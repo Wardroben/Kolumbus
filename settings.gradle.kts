@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -21,4 +22,7 @@ dependencyResolutionManagement {
 
 rootProject.name = "Kolumbus"
 include(":app")
- 
+include(":feature:places")
+include(":feature:edit")
+include(":feature:settings")
+include(":core:database")
