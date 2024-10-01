@@ -4,6 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.datetime.Instant
+import ru.smalljinn.model.data.Position
 
 @Entity(tableName = "places")
 data class PlaceEntity(

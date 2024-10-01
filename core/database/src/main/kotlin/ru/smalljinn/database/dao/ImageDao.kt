@@ -1,19 +1,23 @@
 package ru.smalljinn.database.dao
 
-import android.net.Uri
 import androidx.room.Dao
-import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import ru.smalljinn.database.model.ImageEntity
 
 @Dao
 interface ImageDao {
-    @Upsert
-    suspend fun upsertImages(images: List<ImageEntity>)
-    @Delete
-    suspend fun deleteImages(images: List<ImageEntity>)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun insertImages(images: List<ImageEntity>)
+
+    @Query("""
+        DELETE FROM images
+        WHERE id LIKE :imageId
+    """)
+    suspend fun deleteImageById(imageId: Long)
+
     @Query(
         """
             SELECT * FROM images
@@ -21,11 +25,4 @@ interface ImageDao {
         """
     )
     fun getPlaceImagesStream(placeId: Long): Flow<List<ImageEntity>>
-    @Query(
-        """
-            SELECT uri FROM images
-            WHERE id LIKE :imageId
-        """
-    )
-    suspend fun getHeadingImageUri(imageId: Long): Uri
 }

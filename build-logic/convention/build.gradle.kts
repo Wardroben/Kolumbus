@@ -50,5 +50,13 @@ gradlePlugin {
             id = "kolumbus.android.library"
             implementationClass = "AndroidLibraryConventionPlugin"
         }
+        register("jvmLibrary") {
+            id = "kolumbus.jvm.library"
+            implementationClass = "JvmLibraryConventionPlugin"
+        }
+        register("androidLibraryCompose") {
+            id = "kolumbus.android.library.compose"
+            implementationClass = "AndroidLibraryComposeConventionPlugin"
+        }
     }
 }

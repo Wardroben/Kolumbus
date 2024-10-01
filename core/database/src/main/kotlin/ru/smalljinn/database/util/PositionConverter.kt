@@ -1,7 +1,7 @@
 package ru.smalljinn.database.util
 
 import androidx.room.TypeConverter
-import ru.smalljinn.database.model.Position
+import ru.smalljinn.model.data.Position
 
 const val POSITION_SPLITTER = ','
 
