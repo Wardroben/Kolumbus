@@ -53,7 +53,7 @@ class PlaceDaoTest {
         }
         imageDao.insertImages(placeImageEntities)
 
-        val place = placeDao.getPlaceById(2)
+        val place = placeDao.getPlaceById(2).first()
         assertNotEquals(illegal = null, actual = place.placeEntity.headerImageId)
     }
 
@@ -75,15 +75,15 @@ class PlaceDaoTest {
         )
         imageDao.insertImages(placeImageEntities)
 
-        val placeImages = imageDao.getPlaceImagesStream(placeEntityWithImages.id).first()
-        val placeImagesCount = placeImageEntities.filter { it.placeId == placeEntityWithImages.id }.size
+        val placeImages = imageDao.getPlaceImagesStream(placeEntityWithImages.placeId).first()
+        val placeImagesCount = placeImageEntities.filter { it.placeId == placeEntityWithImages.placeId }.size
         assertEquals(placeImagesCount, placeImages.size)
     }
 }
 
 private fun testPlaceEntity(id: Long, headerImageId: Long?) =
     PlaceEntity(
-        id = id,
+        placeId = id,
         title = "",
         description = "",
         position = Position(0.0,0.0),
@@ -94,7 +94,7 @@ private fun testPlaceEntity(id: Long, headerImageId: Long?) =
 
 private fun testImageEntity(id: Long, placeId: Long) =
     ImageEntity(
-        id = id,
+        imageId = id,
         uri = "datasource://path.image$id",
         placeId = placeId
     )

@@ -3,7 +3,7 @@ package ru.smalljinn.database.model
 import ru.smalljinn.model.data.Image
 
 fun ImageEntity.asModel() = Image(
-    id = id,
+    id = imageId,
     url = uri
 )
 

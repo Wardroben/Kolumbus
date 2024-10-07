@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_places_title">Kolumbus</string>
+    <string name="feature_places_navigation_content_description">Open search</string>
+    <string name="loading_places_description">Loading places…</string>
+</resources>

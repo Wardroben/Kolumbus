@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Kolumbus</string>
+    <string name="app_open_settings_action_content_description">Open settings</string>
 </resources>

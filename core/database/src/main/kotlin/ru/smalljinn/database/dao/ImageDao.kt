@@ -10,11 +10,11 @@ import ru.smalljinn.database.model.ImageEntity
 @Dao
 interface ImageDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertImages(images: List<ImageEntity>)
+    suspend fun insertImages(images: List<ImageEntity>): List<Long>
 
     @Query("""
         DELETE FROM images
-        WHERE id LIKE :imageId
+        WHERE image_id LIKE :imageId
     """)
     suspend fun deleteImageById(imageId: Long)
 

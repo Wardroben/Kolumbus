@@ -17,6 +17,12 @@ interface PlaceDao {
     @Delete
     suspend fun deletePlace(place: PlaceEntity)
 
+    @Query("""
+        DELETE FROM places
+        WHERE place_id LIKE :id
+    """)
+    suspend fun deletePlaceById(id: Long)
+
     @Query(
         """
             SELECT * FROM places
@@ -25,13 +31,14 @@ interface PlaceDao {
     )
     fun getPlacesStream(): Flow<List<PlaceEntity>>
 
+    @Transaction
     @Query(
         """
             SELECT * FROM places
-            WHERE id LIKE :placeId
+            WHERE place_id LIKE :placeId
         """
     )
-    suspend fun getPlaceById(placeId: Long): PlaceWithImages
+    fun getPlaceById(placeId: Long): Flow<PlaceWithImages>
 
     @Transaction
     @Query("""
