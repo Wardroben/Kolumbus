@@ -13,9 +13,9 @@ import java.time.format.FormatStyle
 import java.util.Locale
 
 @Composable
-fun CreationDate(modifier: Modifier = Modifier, creationDate: Instant) {
+fun CreationDate(creationDate: Instant, longFormat: Boolean = false, modifier: Modifier = Modifier) {
     val formattedDate = DateTimeFormatter
-        .ofLocalizedDate(FormatStyle.MEDIUM)
+        .ofLocalizedDate(if (longFormat) FormatStyle.FULL else FormatStyle.MEDIUM)
         .withLocale(Locale.getDefault())
         .withZone(TimeZone.currentSystemDefault().toJavaZoneId())
         .format(creationDate.toJavaInstant())

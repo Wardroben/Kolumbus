@@ -1,13 +1,11 @@
 package ru.smalljinn.place
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.windowInsetsTopHeight
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
@@ -18,9 +16,11 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,7 +55,9 @@ fun PlaceScreen(
             onPlaceDeleted()
             viewModel.obtainEvent(PlaceEvent.DeletePlace)
         },
-        onEditClick = {}
+        onEditClick = { viewModel.obtainEvent(PlaceEvent.EditPlace) },
+        onSaveChanges = {},
+        onCancelEditing = { viewModel.obtainEvent(PlaceEvent.CancelEditing) }
     )
 }
 
@@ -67,14 +69,17 @@ internal fun PlaceScreen(
     onDeleteClick: () -> Unit,
     onEditClick: () -> Unit,
     onRemoveImage: (Image) -> Unit,
+    onSaveChanges: () -> Unit,
+    onCancelEditing: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
         modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        item {
+        /*item {
             Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
-        }
+        }*/
         when (placeUiState) {
             is PlaceUiState.Success -> {
                 item {
@@ -85,6 +90,8 @@ internal fun PlaceScreen(
                         onDeleteClick = onDeleteClick,
                         onEditClick = onEditClick,
                         onShareClick = { TODO("Share action") },
+                        onSaveChanges = onSaveChanges,
+                        onCancelEditing = onCancelEditing
                     )
                 }
                 placeBody(
@@ -98,7 +105,6 @@ internal fun PlaceScreen(
 
             PlaceUiState.Error -> Unit //TODO("error content with retry button")
             PlaceUiState.Loading -> item { LoadingContent("Loading place...") }
-
         }
     }
 }
@@ -111,13 +117,17 @@ private fun PlaceImagesRow(
     onRemoveImage: (Image) -> Unit
 ) {
     LazyRow(
-        modifier = modifier
-            .height(180.dp)
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(items = images, key = { it.id }, contentType = { "placeImage" }) { image ->
             RemovablePlaceImages(
+                modifier = Modifier.sizeIn(
+                    minWidth = 135.dp,
+                    minHeight = 180.dp,
+                    maxWidth = 240.dp,
+                    maxHeight = 180.dp
+                ),
                 onRemoveClick = { onRemoveImage(image) },
                 readyToDelete = isEditing
             ) {
@@ -161,7 +171,7 @@ private fun LazyListScope.placeBody(
         )
         //TODO favorite button
     }
-    item { CreationDate(creationDate = place.creationDate) }
+    item { CreationDate(creationDate = place.creationDate, longFormat = true) }
     item {
         TransparentTextField(
             text = place.description,
@@ -182,16 +192,58 @@ private fun PlaceToolbar(
     onShareClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    onCancelEditing: () -> Unit,
+    onSaveChanges: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    Box(modifier = modifier) {
+        AnimatedContent(targetState = isEditing, label = "AnimatedPlaceToolbar") { editing ->
+            if (editing) PlaceEditingButtons(
+                cancelEditing = onCancelEditing,
+                saveChanges = onSaveChanges
+            )
+            else PlaceControlButtons(
+                showBackButton = showBackButton,
+                onBackClick = onBackClick,
+                onDeleteClick = onDeleteClick,
+                onEditClick = onEditClick,
+                onShareClick = onShareClick
+            )
+        }
+    }
+}
+
+@Composable
+private fun PlaceEditingButtons(
+    cancelEditing: () -> Unit,
+    saveChanges: () -> Unit,
+) {
     Row(
-        modifier = modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        //TODO when isEditing show cancel button and save instead of backbutton and sharebutton
+        TextButton(onClick = cancelEditing) {
+            Text("Cancel")
+        }
+        Text("Editing mode", style = MaterialTheme.typography.bodySmall)
+        TextButton(onClick = saveChanges) {
+            Text("Save")
+        }
+    }
+}
+
+@Composable
+private fun PlaceControlButtons(
+    showBackButton: Boolean,
+    onBackClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onEditClick: () -> Unit,
+    onShareClick: () -> Unit
+) {
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
         if (showBackButton) {
-            IconButton(onClick = { onBackClick() }) {
+            FilledTonalIconButton(onClick = { onBackClick() }) {
                 Icon(
                     Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = stringResource(R.string.back_cd)
@@ -199,21 +251,21 @@ private fun PlaceToolbar(
             }
         }
 
-        IconButton(onClick = onDeleteClick) {
+        FilledTonalIconButton(onClick = onDeleteClick) {
             Icon(
                 Icons.Default.Delete,
                 contentDescription = stringResource(R.string.delete_place_cd)
             )
         }
 
-        IconButton(onClick = onEditClick) {
+        FilledTonalIconButton(onClick = onEditClick) {
             Icon(
                 Icons.Default.Edit,
                 contentDescription = stringResource(R.string.edit_place_cd)
             )
         }
 
-        IconButton(onClick = { onShareClick() }) {
+        FilledTonalIconButton(onClick = { onShareClick() }) {
             Icon(Icons.Default.Share, contentDescription = stringResource(R.string.share_place_cd))
         }
     }

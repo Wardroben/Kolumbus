@@ -3,6 +3,7 @@ package ru.smalljinn.ui
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -23,7 +24,8 @@ fun TransparentTextField(
             value = text,
             onValueChange = onTextChanged,
             readOnly = readOnly,
-            textStyle = style,
+            textStyle = style.copy(color = LocalContentColor.current),
+
         )
         hintText?.let {
             if (shouldShowHint) {
