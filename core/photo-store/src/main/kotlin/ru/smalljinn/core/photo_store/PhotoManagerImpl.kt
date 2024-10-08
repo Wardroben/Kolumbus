@@ -30,24 +30,24 @@ class PhotoManagerImpl @Inject constructor(
             try {
                 contentResolver.openInputStream(uri).use { inputStream ->
                     val originalBitmap = BitmapFactory.decodeStream(inputStream)
+                        ?: return Result.Error(PhotoError.DECODE_FAILED)
                     val outputFile = PhotoFileProvider.createFileForPhoto(context)
 
                     FileOutputStream(outputFile).use { outputStream ->
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                            originalBitmap.compress(
-                                Bitmap.CompressFormat.WEBP_LOSSY,
-                                WEBP_COMPRESSION_LEVEL,
-                                outputStream
-                            )
-                        } else {
-                            originalBitmap.compress(
-                                Bitmap.CompressFormat.JPEG,
-                                JPEG_COMPRESSION_LEVEL,
-                                outputStream
-                            )
+                        val compressFormat = when {
+                            Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
+                                Bitmap.CompressFormat.WEBP_LOSSY
+
+                            else -> Bitmap.CompressFormat.JPEG
                         }
+                        val compressLevel =
+                            if (compressFormat == Bitmap.CompressFormat.JPEG) JPEG_COMPRESSION_LEVEL
+                            else WEBP_COMPRESSION_LEVEL
+                        originalBitmap.compress(compressFormat, compressLevel, outputStream)
                     }
+
                     compressedImageUris.add(PhotoFileProvider.getUriForFile(outputFile, context))
+
                     Log.v(
                         TAG,
                         "Photo successfully compressed and saved in file: ${outputFile.path}"
