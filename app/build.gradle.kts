@@ -1,13 +1,7 @@
 plugins {
-    /*alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose)*/
     id("kolumbus.android.application")
     id("kolumbus.android.application.compose")
-    //alias(libs.plugins.ksp)
-    //alias(libs.plugins.kotlin.kapt)
     id("kolumbus.hilt")
-
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -27,6 +21,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

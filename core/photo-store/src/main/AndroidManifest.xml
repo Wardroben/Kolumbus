@@ -4,7 +4,7 @@
     <application>
         <provider
             android:name="ru.smalljinn.core.photo_store.PhotoFileProvider"
-            android:authorities="ru.smalljinn.kolumbus.fileprovider"
+            android:authorities="ru.smalljinn.kolumbus.fileprovider${applicationId}"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
