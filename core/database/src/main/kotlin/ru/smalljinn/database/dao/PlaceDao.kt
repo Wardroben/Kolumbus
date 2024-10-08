@@ -19,7 +19,7 @@ interface PlaceDao {
 
     @Query("""
         DELETE FROM places
-        WHERE place_id LIKE :id
+        WHERE id LIKE :id
     """)
     suspend fun deletePlaceById(id: Long)
 
@@ -35,7 +35,7 @@ interface PlaceDao {
     @Query(
         """
             SELECT * FROM places
-            WHERE place_id LIKE :placeId
+            WHERE id LIKE :placeId
         """
     )
     fun getPlaceById(placeId: Long): Flow<PlaceWithImages>

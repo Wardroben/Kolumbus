@@ -8,7 +8,7 @@ import ru.smalljinn.model.data.Position
 
 @Entity(tableName = "places")
 data class PlaceEntity(
-    @PrimaryKey(autoGenerate = true) @ColumnInfo(name = "place_id") val placeId: Long,
+    @PrimaryKey(autoGenerate = true) val id: Long,
     val title: String,
     val description: String,
     val position: Position,

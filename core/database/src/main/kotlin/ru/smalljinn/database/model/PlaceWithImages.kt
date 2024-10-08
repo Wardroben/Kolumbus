@@ -7,7 +7,7 @@ import androidx.room.Relation
 data class PlaceWithImages(
     @Embedded val placeEntity: PlaceEntity,
     @Relation(
-        parentColumn = "place_id",
+        parentColumn = "id",
         entityColumn = "place_id"
     )
     val imageEntities: List<ImageEntity>

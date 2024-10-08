@@ -4,7 +4,7 @@ import ru.smalljinn.model.data.Place
 
 fun PlaceWithImages.asModel() = with(placeEntity) {
     Place(
-        id = placeId,
+        id = id,
         title = title,
         description = description,
         position = position,
