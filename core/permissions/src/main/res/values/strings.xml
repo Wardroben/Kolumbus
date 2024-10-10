@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permission_required_description">To take photos, the app requires camera permission. Please grant it for this feature to work.</string>
+    <string name="camera_permission_permanently_declined_description">It seems that you have permanently denied access to the camera. Please go to the settings and grant camera permission so that you can take photos in this app.</string>
+    <string name="location_permission_required_description">To determine your location, the app requires access to the device\'s location. Please grant it for this feature to work.</string>
+    <string name="location_permission_permanently_declined_description">It seems that you have permanently denied access to your device location. Please go to the settings and grant location permission so that the app can find your location.</string>
+</resources>

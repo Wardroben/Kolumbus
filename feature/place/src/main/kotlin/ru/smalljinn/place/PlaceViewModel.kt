@@ -28,7 +28,6 @@ class PlaceViewModel @Inject constructor(
     private val placesRepository: PlacesRepository
 ) : ViewModel() {
     private val placeId = savedStateHandle.toRoute<PlaceRoute>().id
-
     private val isEditing = MutableStateFlow(placeId == null)
 
     val placeState: StateFlow<PlaceUiState> = combine(
@@ -82,6 +81,7 @@ internal sealed interface PlaceEvent {
     data object EditPlace : PlaceEvent
     data object DeletePlace : PlaceEvent
     data object CancelEditing : PlaceEvent
+
 }
 
 private fun <D> Flow<D>.asResult(): Flow<Result<D, PlaceError>> =

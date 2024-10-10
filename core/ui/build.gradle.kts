@@ -10,6 +10,8 @@ android {
 dependencies {
     api(project(":core:model"))
     api(libs.androidx.material3)
+    implementation(project(":core:permissions"))
+
     //api(libs.androidx.compose.ui)
     implementation(libs.coil)
 

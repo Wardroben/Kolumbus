@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="camera_permission_required_description">Чтобы делать фото, приложению требуется доступ к камере. Пожалуйста, предоставьте его, чтобы эта функция работала.</string>
+    <string name="location_permission_required_description">Чтобы определять ваше местоположение, приложению требуется доступ к местоположению устройства. Пожалуйста, предоставьте его, чтобы эта функция работала.</string>
+    <string name="camera_permission_permanently_declined_description">Похоже, вы навсегда запретили доступ к камере. Перейдите в настройки и предоставьте разрешение к камере, чтобы можно было делать снимки в этом приложении.</string>
+    <string name="location_permission_permanently_declined_description">Похоже, вы навсегда запретили доступ к местоположению устройства. Пожалуйста, перейдите в настройки и предоставьте разрешение к местоположению.</string>
+</resources>
