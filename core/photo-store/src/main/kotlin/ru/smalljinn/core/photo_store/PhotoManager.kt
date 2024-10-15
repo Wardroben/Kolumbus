@@ -6,5 +6,6 @@ import ru.smalljinn.model.data.response.Result
 
 interface PhotoManager {
     fun savePhotosToDevice(uris: List<Uri>): Result<List<Uri>, PhotoError>
-    fun deletePhotoFromDevice(url: String): Result<Unit, PhotoError>
+    fun deletePhotoFromDevice(uri: Uri): Result<Unit, PhotoError>
+    fun getUriForTakePhoto(): Uri
 }

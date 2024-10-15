@@ -17,10 +17,12 @@ fun TransparentTextField(
     onTextChanged: (String) -> Unit,
     readOnly: Boolean,
     style: TextStyle,
+    onTextOverflow: () -> Unit = {},
     hintText: String? = null,
     shouldShowHint: Boolean
 ) {
     val contentColor = LocalContentColor.current
+    //var lastHeight by remember { mutableIntStateOf(0) }
     Box(modifier = modifier) {
         BasicTextField(
             value = text,
@@ -28,7 +30,12 @@ fun TransparentTextField(
             readOnly = readOnly,
             textStyle = style.copy(color = contentColor),
             cursorBrush = SolidColor(contentColor),
-            modifier = Modifier.fillMaxWidth()
+            onTextLayout = {
+                //if (it.didOverflowHeight) onTextOverflow()
+                           },
+            modifier = Modifier
+                .fillMaxWidth()
+
         )
         hintText?.let {
             if (shouldShowHint) {

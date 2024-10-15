@@ -53,7 +53,7 @@ class PlaceDaoTest {
         }
         imageDao.insertImages(placeImageEntities)
 
-        val place = placeDao.getPlaceById(2).first()
+        val place = placeDao.getPlaceById(2)
         assertNotEquals(illegal = null, actual = place.placeEntity.headerImageId)
     }
 

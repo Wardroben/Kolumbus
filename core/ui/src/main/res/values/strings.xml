@@ -3,4 +3,5 @@
     <string name="permission_required">Permission required</string>
     <string name="open_settings">Open settings</string>
     <string name="cancel">Cancel</string>
+    <string name="no_places_placeholder">There not created places. Make new by clicking \"+\"</string>
 </resources>

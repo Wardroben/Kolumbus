@@ -6,11 +6,13 @@ import androidx.navigation.compose.NavHost
 import ru.smalljinn.kolumbus.ui.KolumbusAppState
 import ru.smalljinn.kolumbus.ui.places2pane.placesListDetailScreen
 import ru.smalljinn.places.navigation.PlacesRoute
+import ru.smalljinn.settings.navigation.settingsScreen
 
 @Composable
 fun KolumbusNavHost(appState: KolumbusAppState,modifier: Modifier = Modifier) {
     val navController = appState.navController
     NavHost(navController = navController, startDestination = PlacesRoute(), modifier = modifier) {
         placesListDetailScreen()
+        settingsScreen()
     }
 }

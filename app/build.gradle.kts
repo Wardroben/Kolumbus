@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation(project(":feature:places"))
     implementation(project(":feature:place"))
+    implementation(project(":feature:settings"))
 
     implementation(project(":core:data"))
     implementation(project(":core:ui"))

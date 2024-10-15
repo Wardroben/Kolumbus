@@ -6,18 +6,21 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.core.net.toFile
+import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import ru.smalljinn.model.data.response.PhotoError
 import ru.smalljinn.model.data.response.Result
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.math.roundToInt
 
 private const val TAG = "PhotoManager"
-private const val WEBP_COMPRESSION_LEVEL = 50
+private const val WEBP_COMPRESSION_LEVEL = 70
 private const val JPEG_COMPRESSION_LEVEL = 70
+private const val TARGET_IMAGE_SIZE = 1024f
 
 class PhotoManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context
@@ -31,6 +34,7 @@ class PhotoManagerImpl @Inject constructor(
                 contentResolver.openInputStream(uri).use { inputStream ->
                     val originalBitmap = BitmapFactory.decodeStream(inputStream)
                         ?: return Result.Error(PhotoError.DECODE_FAILED)
+                    val scaledBitmap = scaleImage(originalBitmap)
                     val outputFile = PhotoFileProvider.createFileForPhoto(context)
 
                     FileOutputStream(outputFile).use { outputStream ->
@@ -43,10 +47,10 @@ class PhotoManagerImpl @Inject constructor(
                         val compressLevel =
                             if (compressFormat == Bitmap.CompressFormat.JPEG) JPEG_COMPRESSION_LEVEL
                             else WEBP_COMPRESSION_LEVEL
-                        originalBitmap.compress(compressFormat, compressLevel, outputStream)
+                        scaledBitmap.compress(compressFormat, compressLevel, outputStream)
                     }
 
-                    compressedImageUris.add(PhotoFileProvider.getUriForFile(outputFile, context))
+                    compressedImageUris.add(outputFile.toUri())
 
                     Log.v(
                         TAG,
@@ -67,13 +71,32 @@ class PhotoManagerImpl @Inject constructor(
         return Result.Success(compressedImageUris.toList())
     }
 
-    override fun deletePhotoFromDevice(url: String): Result<Unit, PhotoError> {
-        if (url.isBlank()) return Result.Error(PhotoError.EMPTY_URIS)
+    /**
+     * Scales images to TARGET size
+     */
+    private fun scaleImage(bitmap: Bitmap): Bitmap {
+        with(bitmap) {
+            val ratio: Float =
+                if (width >= height) TARGET_IMAGE_SIZE / width else TARGET_IMAGE_SIZE / height
+            val scaledWidth = (width * ratio).roundToInt()
+            val scaledHeight = (height * ratio).roundToInt()
+
+            val scaledBitmap = Bitmap.createScaledBitmap(
+                this@with,
+                scaledWidth,
+                scaledHeight,
+                true
+            )
+            return scaledBitmap
+        }
+    }
+
+    override fun deletePhotoFromDevice(uri: Uri): Result<Unit, PhotoError> {
         try {
-            val photoFile = File(url)
-            if (photoFile.exists() && photoFile.isFile) {
-                photoFile.delete()
-            } else Log.e(TAG, "Can't delete file ${photoFile.path}")
+            val photoFile = uri.toFile()
+            val isDeleted = photoFile.delete()
+            if (isDeleted) Log.v(TAG, "Photo file DELETED: ${photoFile.path}")
+            else Log.e(TAG, "Photo file IS NOT deleted: ${photoFile.path}")
         } catch (e: NullPointerException) {
             e.printStackTrace()
             return Result.Error(PhotoError.FILE_NOT_FOUND)
@@ -85,5 +108,10 @@ class PhotoManagerImpl @Inject constructor(
             return Result.Error(PhotoError.UNKNOWN)
         }
         return Result.Success(Unit)
+    }
+
+    override fun getUriForTakePhoto(): Uri {
+        val photoFile = PhotoFileProvider.createTemporaryFileForPhoto(context)
+        return PhotoFileProvider.getUriForFile(photoFile, context)
     }
 }

@@ -8,4 +8,5 @@
     <string name="edit_place_cd">Edit place</string>
     <string name="take_a_photo_cd">Take a photo</string>
     <string name="take_image_from_gallery_cd">Take image from gallery</string>
+    <string name="loading_place">Loading place...</string>
 </resources>

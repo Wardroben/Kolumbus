@@ -2,6 +2,12 @@ package ru.smalljinn.kolumbus.ui.places2pane
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.Keep
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -21,6 +27,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
@@ -28,6 +36,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
+import ru.smalljinn.kolumbus.R
 import ru.smalljinn.place.PlaceDetailPlaceholder
 import ru.smalljinn.place.navigation.PlaceRoute
 import ru.smalljinn.place.navigation.navigateToPlace
@@ -93,8 +102,8 @@ fun PlacesListDetailScreen(
     }
     val nestedNavController = key(nestedNavKey) { rememberNavController() }
 
-    fun onPlaceClickShowDetailPane(placeId: Long) {
-        onPlaceClick(placeId)
+    fun onPlaceClickShowDetailPane(placeId: Long?) {
+        if (placeId != null) onPlaceClick(placeId)
         if (listDetailNavigator.isDetailPaneVisible()) {
             nestedNavController.navigateToPlace(placeId) {
                 popUpTo<DetailPaneNavHostRoute>()
@@ -108,7 +117,6 @@ fun PlacesListDetailScreen(
 
     fun onPlaceDeleted() {
         placeDeleted()
-        //nestedNavController.navigate(PlacesRoute)
         if (!listDetailNavigator.isDetailPaneVisible()) {
             listDetailNavigator.navigateBack()
         }
@@ -121,10 +129,25 @@ fun PlacesListDetailScreen(
         directive = listDetailNavigator.scaffoldDirective,
         listPane = {
             AnimatedPane {
-                PlacesRoute(
-                    onPlaceClicked = ::onPlaceClickShowDetailPane,
-                    highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible()
-                )
+                Scaffold(
+                    floatingActionButton = {
+                        FloatingActionButton(onClick = {
+                            //TODO make creation logic with navigation to empty place
+                            onPlaceClickShowDetailPane(placeId = null)
+                        }) {
+                            Icon(
+                                Icons.Default.Add,
+                                contentDescription = stringResource(R.string.start_creating_new_place)
+                            )
+                        }
+                    }
+                ) { padding ->
+                    PlacesRoute(
+                        onPlaceClicked = ::onPlaceClickShowDetailPane,
+                        highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible(),
+                        modifier = Modifier.padding(padding)
+                    )
+                }
             }
         },
         detailPane = {

@@ -38,7 +38,7 @@ interface PlaceDao {
             WHERE id LIKE :placeId
         """
     )
-    fun getPlaceById(placeId: Long): Flow<PlaceWithImages>
+    suspend fun getPlaceById(placeId: Long): PlaceWithImages
 
     @Transaction
     @Query("""

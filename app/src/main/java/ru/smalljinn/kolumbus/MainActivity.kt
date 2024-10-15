@@ -16,10 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -28,6 +25,7 @@ import ru.smalljinn.kolumbus.navigation.KolumbusNavHost
 import ru.smalljinn.kolumbus.navigation.TopLevelDestination
 import ru.smalljinn.kolumbus.ui.rememberKolumbusAppState
 import ru.smalljinn.kolumbus.ui.theme.KolumbusTheme
+import ru.smalljinn.settings.navigation.navigateToSettings
 import ru.smalljinn.ui.KolumbusTopAppBar
 
 @AndroidEntryPoint
@@ -42,19 +40,6 @@ class MainActivity : ComponentActivity() {
                 val destination = appState.currentTopLevelDestination
                 Scaffold(
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
-                    floatingActionButton = {
-                        if (destination != null) {
-                            FloatingActionButton(onClick = {
-                                //TODO make creation logic with navigation to empty place
-                                mainViewModel.createNewPlace()
-                            }) {
-                                Icon(
-                                    Icons.Default.Add,
-                                    contentDescription = "Start creating new place"
-                                )
-                            }
-                        }
-                    }
                 ) { padding ->
                     Column(
                         modifier = Modifier
@@ -85,6 +70,7 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onActionClick = {
                                     //TODO open settings or show settings dialog
+                                    appState.navController.navigateToSettings()
                                 }
                             )
 

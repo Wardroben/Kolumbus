@@ -1,15 +1,14 @@
 package ru.smalljinn.database.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 import ru.smalljinn.database.model.ImageEntity
 
 @Dao
 interface ImageDao {
-    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    @Upsert
     suspend fun insertImages(images: List<ImageEntity>): List<Long>
 
     @Query("""
