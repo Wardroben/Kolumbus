@@ -23,5 +23,5 @@ fun NavGraphBuilder.settingsScreen() {
 
 @Composable
 fun TestSettingsScreen(modifier: Modifier = Modifier) {
-    Text("You are at settings")
+    Text("You are at settings", modifier = modifier)
 }

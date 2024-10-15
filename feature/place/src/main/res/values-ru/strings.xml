@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="back_cd">Назад</string>
+    <string name="share_place_cd">Поделиться местом</string>
+    <string name="title_optional_cd">Заголовок (необязательно)</string>
+    <string name="description_cd">Описание</string>
+    <string name="delete_place_cd">Удалить место</string>
+    <string name="edit_place_cd">Редактировать место</string>
+    <string name="take_a_photo_cd">Сделать фото</string>
+    <string name="take_image_from_gallery_cd">Выбрать изображения из галереи</string>
+    <string name="loading_place">Загрузка мест…</string>
+</resources>

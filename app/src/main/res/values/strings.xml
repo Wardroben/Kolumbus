@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Kolumbus</string>
+    <string name="app_name" translatable="false">Kolumbus</string>
     <string name="app_open_settings_action_content_description">Open settings</string>
     <string name="start_creating_new_place">Start creating new place</string>
 </resources>

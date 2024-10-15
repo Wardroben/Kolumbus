@@ -9,7 +9,7 @@ import java.io.IOException
 
 const val AUTHORITY = "ru.smalljinn.kolumbus.fileprovider"
 const val IMAGES_PATH_NAME = "images"
-const val TEMPORARY_IMAGES_PATH_NAME = "images"
+const val TEMPORARY_IMAGES_PATH_NAME = "temp_images"
 
 class PhotoFileProvider : FileProvider(R.xml.file_paths) {
     companion object {
@@ -20,7 +20,7 @@ class PhotoFileProvider : FileProvider(R.xml.file_paths) {
             //require(checkOrCreatePhotoDir(context, TEMPORARY_IMAGES_PATH_NAME))
             val timeMillis = Clock.System.now().toEpochMilliseconds()
             try {
-                val photoDirectory = File(context.cacheDir, "temp_images")
+                val photoDirectory = File(context.cacheDir, TEMPORARY_IMAGES_PATH_NAME)
                 if (!photoDirectory.exists()) photoDirectory.mkdirs()
                 val photoFile = File.createTempFile("temp_image_$timeMillis", ".img", photoDirectory)
                 photoFile.deleteOnExit()
@@ -35,7 +35,7 @@ class PhotoFileProvider : FileProvider(R.xml.file_paths) {
         }
 
         fun createFileForPhoto(context: Context): File {
-            require(checkOrCreatePhotoDir(context, IMAGES_PATH_NAME))
+            require(checkOrCreatePhotoDir(context))
             val timeMillis = Clock.System.now().toEpochMilliseconds()
             try {
                 val photoFile = File(context.filesDir, "$IMAGES_PATH_NAME/image_$timeMillis.img")
@@ -52,9 +52,9 @@ class PhotoFileProvider : FileProvider(R.xml.file_paths) {
     }
 }
 
-private fun checkOrCreatePhotoDir(context: Context, directoryName: String): Boolean {
+private fun checkOrCreatePhotoDir(context: Context): Boolean {
     try {
-        val fileDirectory = File(context.filesDir, directoryName)
+        val fileDirectory = File(context.filesDir, IMAGES_PATH_NAME)
         if (!fileDirectory.exists()) return fileDirectory.mkdirs()
     } catch (e: IOException) {
         e.printStackTrace()
