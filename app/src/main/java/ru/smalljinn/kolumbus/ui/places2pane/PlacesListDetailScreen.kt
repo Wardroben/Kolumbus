@@ -37,6 +37,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.serialization.Serializable
 import ru.smalljinn.kolumbus.R
+import ru.smalljinn.model.data.Place
 import ru.smalljinn.place.PlaceDetailPlaceholder
 import ru.smalljinn.place.navigation.PlaceRoute
 import ru.smalljinn.place.navigation.navigateToPlace
@@ -102,8 +103,8 @@ fun PlacesListDetailScreen(
     }
     val nestedNavController = key(nestedNavKey) { rememberNavController() }
 
-    fun onPlaceClickShowDetailPane(placeId: Long?) {
-        if (placeId != null) onPlaceClick(placeId)
+    fun onPlaceClickShowDetailPane(placeId: Long) {
+        onPlaceClick(placeId)
         if (listDetailNavigator.isDetailPaneVisible()) {
             nestedNavController.navigateToPlace(placeId) {
                 popUpTo<DetailPaneNavHostRoute>()
@@ -133,7 +134,7 @@ fun PlacesListDetailScreen(
                     floatingActionButton = {
                         FloatingActionButton(onClick = {
                             //TODO make creation logic with navigation to empty place
-                            onPlaceClickShowDetailPane(placeId = null)
+                            onPlaceClickShowDetailPane(placeId = -1L)
                         }) {
                             Icon(
                                 Icons.Default.Add,
@@ -144,7 +145,7 @@ fun PlacesListDetailScreen(
                 ) { padding ->
                     PlacesRoute(
                         onPlaceClicked = ::onPlaceClickShowDetailPane,
-                        highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible(),
+                        highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible() && selectedPlaceId != Place.CREATION_ID,
                         modifier = Modifier.padding(padding)
                     )
                 }

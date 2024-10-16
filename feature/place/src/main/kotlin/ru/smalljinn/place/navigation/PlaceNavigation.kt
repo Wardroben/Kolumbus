@@ -8,9 +8,9 @@ import kotlinx.serialization.Serializable
 import ru.smalljinn.place.PlaceScreen
 
 @Serializable
-data class PlaceRoute(val id: Long?)
+data class PlaceRoute(val id: Long)
 
-fun NavController.navigateToPlace(placeId: Long?, navOptions: NavOptionsBuilder.() -> Unit) {
+fun NavController.navigateToPlace(placeId: Long, navOptions: NavOptionsBuilder.() -> Unit) {
     navigate(route = PlaceRoute(placeId)) {
         navOptions()
     }
