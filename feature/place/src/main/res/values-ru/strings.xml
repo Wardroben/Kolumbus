@@ -11,4 +11,8 @@
     <string name="loading_place">Загрузка мест…</string>
     <string name="empty_title_exception">Заголовок не может быть пустым</string>
     <string name="invalid_position_exception">Местоположение некорректно</string>
+    <string name="cancel_action">Отмена</string>
+    <string name="save_action">Сохранить</string>
+    <string name="editing_mode_label">Режим редактирования</string>
+    <string name="no_images_label">Изображений нет</string>
 </resources>

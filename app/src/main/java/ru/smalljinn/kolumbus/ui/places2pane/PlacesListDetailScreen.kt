@@ -2,7 +2,6 @@ package ru.smalljinn.kolumbus.ui.places2pane
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.Keep
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -55,7 +54,7 @@ internal object PlacePlaceholderRoute
 @Serializable
 internal object DetailPaneNavHostRoute
 
-fun NavGraphBuilder.placesListDetailScreen(@StringRes onShowMessage: (Int) -> Unit) {
+fun NavGraphBuilder.placesListDetailScreen(onShowMessage: (Int) -> Unit) {
     composable<PlacesRoute> {
         PlacesListDetailScreen(onShowMessage = onShowMessage)
     }
@@ -64,7 +63,7 @@ fun NavGraphBuilder.placesListDetailScreen(@StringRes onShowMessage: (Int) -> Un
 @Composable
 internal fun PlacesListDetailScreen(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
-    @StringRes onShowMessage: (Int) -> Unit,
+    onShowMessage: (Int) -> Unit,
     viewModel: Places2PaneViewModel = hiltViewModel()
 ) {
     val selectedPlaceId by viewModel.selectedPlaceId.collectAsStateWithLifecycle()
@@ -83,7 +82,7 @@ fun PlacesListDetailScreen(
     onPlaceClick: (Long) -> Unit,
     selectedPlaceId: Long?,
     placeDeleted: () -> Unit,
-    @StringRes onShowMessage: (Int) -> Unit,
+    onShowMessage: (Int) -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo
 ) {
     val listDetailNavigator = rememberListDetailPaneScaffoldNavigator(

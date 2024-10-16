@@ -11,4 +11,8 @@
     <string name="loading_place">Loading place…</string>
     <string name="empty_title_exception">Title can not be empty</string>
     <string name="invalid_position_exception">Position invalid</string>
+    <string name="cancel_action">Cancel</string>
+    <string name="save_action">Save</string>
+    <string name="editing_mode_label">Editing mode</string>
+    <string name="no_images_label">No images</string>
 </resources>

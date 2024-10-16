@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -25,10 +24,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -81,7 +80,7 @@ fun PlaceScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
     onPlaceDeleted: () -> Unit,
-    @StringRes onShowMessage: (Int) -> Unit,
+    onShowMessage: (Int) -> Unit,
     viewModel: PlaceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -109,9 +108,9 @@ fun PlaceScreen(
             onPlaceDeleted()
             viewModel.deletePlace()
         },
-        onEditClick = viewModel::startEditing,//{ viewModel.obtainEvent(PlaceEvent.EditPlace) },
+        onEditClick = viewModel::startEditing,
         onSaveChanges = viewModel::saveChanges,
-        onCancelEditing = viewModel::cancelChanges,//{ viewModel.obtainEvent(PlaceEvent.CancelEditing) },
+        onCancelEditing = viewModel::cancelChanges,
         onDescriptionChanged = viewModel::setDescription,
         onTitleChanged = viewModel::setTitle,
         onOpenSettings = { context.startActivity(viewModel.getSettingsIntent()) },
@@ -165,7 +164,10 @@ internal fun PlaceScreen(
                         onShareClick = { TODO("Share action") },
                         onSaveChanges = onSaveChanges,
                         onCancelEditing = onCancelEditing,
-                        isDataProcessing = isDataProcessing
+                        isDataProcessing = isDataProcessing,
+                        canSave = with(placeUiState.placeDetailState) {
+                            title.isNotBlank() && images.isNotEmpty()
+                        }
                     )
                 }
                 placeDetailBody(
@@ -183,7 +185,7 @@ internal fun PlaceScreen(
                 item {
                     Spacer(
                         Modifier.windowInsetsBottomHeight(
-                            WindowInsets.systemBars
+                            WindowInsets.ime
                         )
                     )
                 }
@@ -280,7 +282,7 @@ private fun NoImagesPlaceholder(modifier: Modifier = Modifier) {
             .background(MaterialTheme.colorScheme.secondaryContainer),
         contentAlignment = Alignment.Center
     ) {
-        Text("No images")
+        Text(stringResource(R.string.no_images_label))
     }
 }
 
@@ -443,7 +445,6 @@ private fun LazyListScope.placeDetailBody(
                 style = MaterialTheme.typography.bodyLarge,
                 hintText = stringResource(R.string.description_cd),
                 shouldShowHint = isEditing && placeDetailState.description.isBlank(),
-                //onTextOverflow = onDescriptionOverflow,
                 modifier = Modifier
                     .heightIn(100.dp, max = if (!isEditing) Int.MAX_VALUE.dp else 300.dp)
                     .padding(horizontal = 16.dp)
@@ -464,12 +465,14 @@ private fun PlaceToolbar(
     onCancelEditing: () -> Unit,
     onSaveChanges: () -> Unit,
     isDataProcessing: Boolean,
+    canSave: Boolean
 ) {
     Box(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
         AnimatedContent(targetState = isEditing, label = "AnimatedPlaceToolbar") { editing ->
             if (editing) PlaceEditingButtons(
                 cancelEditing = onCancelEditing,
-                saveChanges = onSaveChanges
+                saveChanges = onSaveChanges,
+                canSave = canSave
             )
             else PlaceControlButtons(
                 showBackButton = showBackButton,
@@ -487,6 +490,7 @@ private fun PlaceToolbar(
 private fun PlaceEditingButtons(
     cancelEditing: () -> Unit,
     saveChanges: () -> Unit,
+    canSave: Boolean
 ) {
     Row(
         Modifier.fillMaxWidth(),
@@ -494,11 +498,11 @@ private fun PlaceEditingButtons(
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextButton(onClick = cancelEditing) {
-            Text("Cancel")
+            Text(stringResource(R.string.cancel_action))
         }
-        Text("Editing mode", style = MaterialTheme.typography.bodySmall)
-        Button(onClick = saveChanges) {
-            Text("Save")
+        Text(stringResource(R.string.editing_mode_label), style = MaterialTheme.typography.bodySmall)
+        Button(onClick = saveChanges, enabled = canSave) {
+            Text(stringResource(R.string.save_action))
         }
     }
 }
