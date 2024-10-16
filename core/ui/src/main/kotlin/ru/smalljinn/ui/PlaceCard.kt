@@ -31,11 +31,11 @@ import ru.smalljinn.model.data.Place
 
 @Composable
 fun PlaceCard(
+    modifier: Modifier = Modifier,
     onClick: () -> Unit,
     onFavorite: () -> Unit,
     isSelected: Boolean = false,
-    place: Place,
-    modifier: Modifier = Modifier
+    place: Place
 ) {
     val headerImageUrl = remember {
         with(place) {
@@ -68,17 +68,15 @@ fun PlaceCard(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (place.title.isNotBlank()) {
-                        PlaceTitle(place.title, modifier = Modifier.fillMaxWidth(.8f))
-                        Spacer(Modifier.weight(1f))
-                    } else Spacer(Modifier.weight(1f))
+                    PlaceTitle(place.title, modifier = Modifier.fillMaxWidth(.8f))
+                    Spacer(Modifier.weight(1f))
                     FavoriteButton(
                         isFavorite = place.favorite,
                         onClick = onFavorite
                     )
                 }
                 CreationDate(place.creationDate)
-                PlaceDescription(place.description)
+                if (place.description.isNotBlank()) PlaceDescription(place.description)
             }
         }
 

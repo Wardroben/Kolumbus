@@ -340,6 +340,7 @@ private fun TakeCameraPhotoButton(
                 hasCameraAccess -> {
                     getUriAndLaunchCamera()
                 }
+
                 else -> requestPermission()
             }
         },
@@ -400,23 +401,16 @@ private fun LazyListScope.placeDetailBody(
     //TODO map
     item {
         //title
-        AnimatedVisibility(
-            isEditing || placeDetailState.title.isNotBlank(),
-            enter = expandVertically() + fadeIn(),
-            exit = shrinkVertically() + fadeOut()
-        ) {
-            TransparentTextField(
-                text = placeDetailState.title,
-                readOnly = !isEditing,
-                onTextChanged = onTitleChanged,
-                style = MaterialTheme.typography.titleLarge,
-                hintText = stringResource(R.string.title_cd),
-                shouldShowHint = isEditing && placeDetailState.title.isBlank(),
-                imeAction = ImeAction.Next,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-
-        }
+        TransparentTextField(
+            text = placeDetailState.title,
+            readOnly = !isEditing,
+            onTextChanged = onTitleChanged,
+            style = MaterialTheme.typography.titleLarge,
+            hintText = stringResource(R.string.title_cd),
+            shouldShowHint = isEditing && placeDetailState.title.isBlank(),
+            imeAction = ImeAction.Next,
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         //TODO favorite button
     }
     item {
@@ -428,18 +422,24 @@ private fun LazyListScope.placeDetailBody(
     }
     item {
         //Description
-        TransparentTextField(
-            text = placeDetailState.description,
-            readOnly = !isEditing,
-            onTextChanged = onDescriptionChanged,
-            style = MaterialTheme.typography.bodyLarge,
-            hintText = stringResource(R.string.description_cd),
-            shouldShowHint = isEditing && placeDetailState.description.isBlank(),
-            //onTextOverflow = onDescriptionOverflow,
-            modifier = Modifier
-                .heightIn(100.dp, max = if (!isEditing) Int.MAX_VALUE.dp else 300.dp)
-                .padding(horizontal = 16.dp)
-        )
+        AnimatedVisibility(
+            isEditing || placeDetailState.description.isNotBlank(),
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            TransparentTextField(
+                text = placeDetailState.description,
+                readOnly = !isEditing,
+                onTextChanged = onDescriptionChanged,
+                style = MaterialTheme.typography.bodyLarge,
+                hintText = stringResource(R.string.description_cd),
+                shouldShowHint = isEditing && placeDetailState.description.isBlank(),
+                //onTextOverflow = onDescriptionOverflow,
+                modifier = Modifier
+                    .heightIn(100.dp, max = if (!isEditing) Int.MAX_VALUE.dp else 300.dp)
+                    .padding(horizontal = 16.dp)
+            )
+        }
     }
 }
 
