@@ -1,7 +1,6 @@
 package ru.smalljinn.place
 
 import android.net.Uri
-import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -11,7 +10,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,13 +21,11 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ru.smalljinn.core.photo_store.PhotoManager
-import ru.smalljinn.kolumbus.data.repository.ImageRepository
 import ru.smalljinn.kolumbus.data.repository.PlacesRepository
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.model.data.Position
 import ru.smalljinn.model.data.response.PlaceError
-import ru.smalljinn.model.data.response.Result
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.place.navigation.PlaceRoute
 import javax.inject.Inject
@@ -40,12 +36,13 @@ private const val TAG = "PlaceVM"
 class PlaceViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
-    private val imageRepository: ImageRepository,
     private val permissionManager: PermissionManager,
-    private val photoManager: PhotoManager
+    private val photoManager: PhotoManager,
+    private val savePlaceUseCase: SavePlaceUseCase,
+    private val deletePlaceUseCase: DeletePlaceUseCase
 ) : ViewModel() {
     private val initialMode = when (val placeId = savedStateHandle.toRoute<PlaceRoute>().id) {
-        null -> InitialMode.Creation
+        Place.CREATION_ID -> InitialMode.Creation
         else -> InitialMode.View(placeId)
     }
 
@@ -84,6 +81,7 @@ class PlaceViewModel @Inject constructor(
     private val _deletedImages = mutableListOf<Image>()
 
     private val _placePosition = MutableStateFlow<Position?>(null)
+
     //TODO make dataStore where save last user position
     private val _userPosition = MutableStateFlow<Position?>(null)
     private val _headerImageId = MutableStateFlow<Long?>(null)
@@ -133,8 +131,6 @@ class PlaceViewModel @Inject constructor(
 
     fun addImages(uris: List<Uri>) {
         if (uris.isEmpty()) return
-        //val uniqueUris = uris.filterNot { uri -> _images.value.any { image -> image.url == uri.toString() } }
-        //if (uniqueUris.isEmpty()) return
         val newImages = uris.map { uri -> Image(id = 0, url = uri.toString()) }
         _images.update { it.plus(newImages) }
     }
@@ -158,36 +154,26 @@ class PlaceViewModel @Inject constructor(
     }
 
     fun saveChanges() {
-        //TODO save logic
-        //if (_images.value.isEmpty()) return
-        //TODO show error when images empty
-        val imagesToInsert = _images.value.filter { image -> image.id == 0L }
-        val placeToInsert = initialPlace.copy(
-            title = title,
-            description = description,
-            creationDate = _creationDate.value,
-            images = imagesToInsert,
-            position = _placePosition.value ?: Position(
-                0.0,
-                0.0
-            ) //TODO show error when null position
-        )
-        val imagesToDelete = _deletedImages.toList()
         _isDataProcessing.update { true }
-        viewModelScope.launch(Dispatchers.IO) {
-            _isDataProcessing.update { true }
-            if (imagesToDelete.isNotEmpty()) imagesToDelete.forEach { image ->
-                when (val result = imageRepository.deleteImage(image)) {
-                    is Result.Error -> Log.e(TAG, result.error.toString())
-                    is Result.Success -> Log.v(TAG, "Image successfully deleted")
-                }
-            }
-            val id = placesRepository.upsertPlace(placeToInsert)
-            //Prevent creating a lot of places when user creates new place and edit it
-            if (initialPlace.id == 0L && id != -1L) initialPlace = initialPlace.copy(id = id)
-        }.invokeOnCompletion { _isDataProcessing.update { false }  }
+        viewModelScope.launch {
+            val insertPlaceResultId =
+                savePlaceUseCase(place = getPlaceToInsert(), imagesToDelete = _deletedImages.toSet())
+            if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
+                initialPlace = initialPlace.copy(id = insertPlaceResultId)
+        }.invokeOnCompletion { _isDataProcessing.update { false } }
         endEditing()
     }
+
+    private fun getPlaceToInsert(): Place = initialPlace.copy(
+        title = title,
+        description = description,
+        creationDate = _creationDate.value,
+        images = _images.value,
+        position = _placePosition.value ?: Position(
+            0.0,
+            0.0
+        ) //TODO show error when null position
+    )
 
     fun cancelChanges() {
         //TODO restore logic
@@ -198,7 +184,7 @@ class PlaceViewModel @Inject constructor(
     fun deletePlace() {
         if (initialMode is InitialMode.View) {
             viewModelScope.launch {
-                placesRepository.deletePlaceById(initialMode.placeId)
+                deletePlaceUseCase(initialMode.placeId)
             }
         }
     }
