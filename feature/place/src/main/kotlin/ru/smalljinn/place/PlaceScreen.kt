@@ -6,6 +6,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
@@ -69,6 +70,7 @@ import ru.smalljinn.permissions.CameraPermissionTextProvider
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.ui.CreationDate
 import ru.smalljinn.ui.LoadingContent
+import ru.smalljinn.ui.ObserveAsEvents
 import ru.smalljinn.ui.RemovablePlaceImages
 import ru.smalljinn.ui.TakeMediaButton
 import ru.smalljinn.ui.TransparentTextField
@@ -79,6 +81,7 @@ fun PlaceScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
     onPlaceDeleted: () -> Unit,
+    @StringRes onShowMessage: (Int) -> Unit,
     viewModel: PlaceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -87,6 +90,12 @@ fun PlaceScreen(
     val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
     val permissionState by viewModel.permissionState.collectAsStateWithLifecycle()
     val isDataProcessing by viewModel.isDataProcessing.collectAsStateWithLifecycle()
+
+    ObserveAsEvents(viewModel.eventChannel) { event ->
+        when(event) {
+            is PlaceUiEvent.ShowMessage -> onShowMessage(event.messageId)
+        }
+    }
 
     PlaceScreen(
         showBackButton = showBackButton,

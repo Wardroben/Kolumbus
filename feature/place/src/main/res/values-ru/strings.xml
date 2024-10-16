@@ -9,4 +9,6 @@
     <string name="take_a_photo_cd">Сделать фото</string>
     <string name="take_image_from_gallery_cd">Выбрать изображения из галереи</string>
     <string name="loading_place">Загрузка мест…</string>
+    <string name="empty_title_exception">Заголовок не может быть пустым</string>
+    <string name="invalid_position_exception">Местоположение некорректно</string>
 </resources>

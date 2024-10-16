@@ -13,12 +13,14 @@ data class Place(
     val favorite: Boolean,
     val images: List<Image>
 ) {
+    val isPlaceInvalid: Boolean
+        get() = position == Position.initialPosition()
     companion object {
         fun getInitPlace() = Place(
             id = -1L,
             title = "",
             description = "",
-            position = Position(0.0,0.0),
+            position = Position.initialPosition(),
             creationDate = Clock.System.now(),
             headerImageId = null,
             favorite = false,

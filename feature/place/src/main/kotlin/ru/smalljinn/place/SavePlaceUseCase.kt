@@ -1,6 +1,7 @@
 package ru.smalljinn.place
 
 import android.util.Log
+import androidx.annotation.StringRes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.smalljinn.kolumbus.data.repository.ImageRepository
@@ -12,11 +13,16 @@ import javax.inject.Inject
 
 private const val TAG = "SavePlaceUC"
 
+
 class SavePlaceUseCase @Inject constructor(
     private val placesRepository: PlacesRepository,
     private val imagesRepository: ImageRepository,
 ) {
+    @Throws(InvalidPlaceException::class)
     suspend operator fun invoke(place: Place, imagesToDelete: Set<Image>): Long {
+        if (place.title.isBlank()) throw InvalidPlaceException(R.string.empty_title_exception)
+        //if (place.isPlaceInvalid) throw InvalidPlaceException(R.string.invalid_position_exception)
+
         return withContext(Dispatchers.IO) {
             val placeId = if (place.id == Place.CREATION_ID) 0L else place.id
             val placeToInsert =
@@ -32,3 +38,5 @@ class SavePlaceUseCase @Inject constructor(
         }
     }
 }
+
+class InvalidPlaceException(@StringRes val messageId: Int): Exception(messageId.toString())

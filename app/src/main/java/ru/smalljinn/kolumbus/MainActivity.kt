@@ -17,9 +17,12 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import ru.smalljinn.kolumbus.navigation.KolumbusNavHost
 import ru.smalljinn.kolumbus.navigation.TopLevelDestination
 import ru.smalljinn.kolumbus.ui.rememberKolumbusAppState
@@ -34,10 +37,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val appState = rememberKolumbusAppState()
+            val context = LocalContext.current
             KolumbusTheme {
                 val destination = appState.currentTopLevelDestination
                 Scaffold(
                     contentWindowInsets = WindowInsets(0, 0, 0, 0),
+                    snackbarHost = { SnackbarHost(appState.snackbarHostState) }
                 ) { padding ->
                     Column(
                         modifier = Modifier
@@ -82,7 +87,16 @@ class MainActivity : ComponentActivity() {
                                 },
                             ),
                         ) {
-                            KolumbusNavHost(appState = appState)
+                            KolumbusNavHost(
+                                appState = appState,
+                                onShowMessage = { messageId: Int ->
+                                    appState.coroutineScope.launch {
+                                        appState.snackbarHostState.showSnackbar(
+                                            message = context.getString(messageId)
+                                        )
+                                    }
+                                }
+                            )
                         }
                     }
                 }

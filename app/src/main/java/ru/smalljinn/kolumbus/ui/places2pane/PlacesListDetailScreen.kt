@@ -2,6 +2,7 @@ package ru.smalljinn.kolumbus.ui.places2pane
 
 import androidx.activity.compose.BackHandler
 import androidx.annotation.Keep
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -54,15 +55,16 @@ internal object PlacePlaceholderRoute
 @Serializable
 internal object DetailPaneNavHostRoute
 
-fun NavGraphBuilder.placesListDetailScreen() {
+fun NavGraphBuilder.placesListDetailScreen(@StringRes onShowMessage: (Int) -> Unit) {
     composable<PlacesRoute> {
-        PlacesListDetailScreen()
+        PlacesListDetailScreen(onShowMessage = onShowMessage)
     }
 }
 
 @Composable
 internal fun PlacesListDetailScreen(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
+    @StringRes onShowMessage: (Int) -> Unit,
     viewModel: Places2PaneViewModel = hiltViewModel()
 ) {
     val selectedPlaceId by viewModel.selectedPlaceId.collectAsStateWithLifecycle()
@@ -70,7 +72,8 @@ internal fun PlacesListDetailScreen(
         windowAdaptiveInfo = windowAdaptiveInfo,
         selectedPlaceId = selectedPlaceId,
         onPlaceClick = { viewModel.selectPlace(it) },
-        placeDeleted = { viewModel.unselectPlace() }
+        placeDeleted = { viewModel.unselectPlace() },
+        onShowMessage = onShowMessage
     )
 }
 
@@ -80,6 +83,7 @@ fun PlacesListDetailScreen(
     onPlaceClick: (Long) -> Unit,
     selectedPlaceId: Long?,
     placeDeleted: () -> Unit,
+    @StringRes onShowMessage: (Int) -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo
 ) {
     val listDetailNavigator = rememberListDetailPaneScaffoldNavigator(
@@ -162,7 +166,8 @@ fun PlacesListDetailScreen(
                         placeScreen(
                             onBackClick = listDetailNavigator::navigateBack,
                             showBackButton = !listDetailNavigator.isListPaneVisible(),
-                            onPlaceDeleted = { onPlaceDeleted() }
+                            onPlaceDeleted = { onPlaceDeleted() },
+                            onShowMessage = onShowMessage
                         )
                         composable<PlacePlaceholderRoute> { PlaceDetailPlaceholder() }
                     }

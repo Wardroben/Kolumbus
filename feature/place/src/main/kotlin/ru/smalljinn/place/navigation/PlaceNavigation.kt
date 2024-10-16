@@ -1,5 +1,6 @@
 package ru.smalljinn.place.navigation
 
+import androidx.annotation.StringRes
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptionsBuilder
@@ -19,13 +20,15 @@ fun NavController.navigateToPlace(placeId: Long, navOptions: NavOptionsBuilder.(
 fun NavGraphBuilder.placeScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
-    onPlaceDeleted: () -> Unit
+    onPlaceDeleted: () -> Unit,
+    @StringRes onShowMessage: (Int) -> Unit
 ) {
     composable<PlaceRoute> {
         PlaceScreen(
             showBackButton = showBackButton,
             onBackClick = onBackClick,
-            onPlaceDeleted = onPlaceDeleted
+            onPlaceDeleted = onPlaceDeleted,
+            onShowMessage = onShowMessage
         )
     }
 }

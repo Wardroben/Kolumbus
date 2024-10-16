@@ -1,6 +1,7 @@
 package ru.smalljinn.place
 
 import android.net.Uri
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,17 +11,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import ru.smalljinn.core.photo_store.PhotoManager
+import ru.smalljinn.kolumbus.data.repository.ImageRepository
 import ru.smalljinn.kolumbus.data.repository.PlacesRepository
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Place
@@ -36,6 +41,7 @@ private const val TAG = "PlaceVM"
 class PlaceViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
+    private val imagesRepository: ImageRepository,
     private val permissionManager: PermissionManager,
     private val photoManager: PhotoManager,
     private val savePlaceUseCase: SavePlaceUseCase,
@@ -67,6 +73,9 @@ class PlaceViewModel @Inject constructor(
         else initialPlace = Place.getInitPlace()
     }
 
+    private val _eventChannel = Channel<PlaceUiEvent>()
+    internal val eventChannel = _eventChannel.receiveAsFlow()
+
     private val _isDataProcessing = MutableStateFlow(false)
     val isDataProcessing = _isDataProcessing.asStateFlow()
 
@@ -75,7 +84,6 @@ class PlaceViewModel @Inject constructor(
 
     private var title by mutableStateOf("")
     private var description by mutableStateOf("")
-
 
     private val _images = MutableStateFlow<List<Image>>(emptyList())
     private val _deletedImages = mutableListOf<Image>()
@@ -156,12 +164,17 @@ class PlaceViewModel @Inject constructor(
     fun saveChanges() {
         _isDataProcessing.update { true }
         viewModelScope.launch {
-            val insertPlaceResultId =
-                savePlaceUseCase(place = getPlaceToInsert(), imagesToDelete = _deletedImages.toSet())
-            if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
-                initialPlace = initialPlace.copy(id = insertPlaceResultId)
+            try {
+                val insertPlaceResultId =
+                    savePlaceUseCase(place = getPlaceToInsert(), imagesToDelete = _deletedImages.toSet())
+                if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
+                    initialPlace = initialPlace.copy(id = insertPlaceResultId)
+                _images.update { imagesRepository.getPlaceImagesStream(initialPlace.id).first() }
+                endEditing()
+            } catch (e: InvalidPlaceException) {
+                _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
+            }
         }.invokeOnCompletion { _isDataProcessing.update { false } }
-        endEditing()
     }
 
     private fun getPlaceToInsert(): Place = initialPlace.copy(
@@ -182,11 +195,7 @@ class PlaceViewModel @Inject constructor(
     }
 
     fun deletePlace() {
-        if (initialMode is InitialMode.View) {
-            viewModelScope.launch {
-                deletePlaceUseCase(initialMode.placeId)
-            }
-        }
+        if (initialPlace.id > 0L) viewModelScope.launch { deletePlaceUseCase(initialPlace.id) }
     }
 
     fun getUriForPhoto(): Uri = photoManager.getUriForTakePhoto()
@@ -230,6 +239,10 @@ internal data class PlaceDetailState(
     val creationDate: Instant = Clock.System.now()
 )
 
+internal sealed interface PlaceUiEvent {
+    data class ShowMessage(@StringRes val messageId: Int): PlaceUiEvent
+}
+
 internal data class PlacePositionState(
     val userPosition: Position?,
     val placePosition: Position?
@@ -250,5 +263,4 @@ internal sealed interface InitialMode {
 
 internal sealed interface CreationEvent {
     data object CancelCreation : CreationEvent
-
 }
