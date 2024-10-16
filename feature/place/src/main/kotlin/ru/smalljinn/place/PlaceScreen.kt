@@ -93,6 +93,7 @@ fun PlaceScreen(
     ObserveAsEvents(viewModel.eventChannel) { event ->
         when(event) {
             is PlaceUiEvent.ShowMessage -> onShowMessage(event.messageId)
+            PlaceUiEvent.NavigateBack -> onBackClick()
         }
     }
 
@@ -493,14 +494,14 @@ private fun PlaceEditingButtons(
     canSave: Boolean
 ) {
     Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceAround,
+        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
         TextButton(onClick = cancelEditing) {
             Text(stringResource(R.string.cancel_action))
         }
-        Text(stringResource(R.string.editing_mode_label), style = MaterialTheme.typography.bodySmall)
+        //Text(stringResource(R.string.editing_mode_label), style = MaterialTheme.typography.bodySmall)
         Button(onClick = saveChanges, enabled = canSave) {
             Text(stringResource(R.string.save_action))
         }

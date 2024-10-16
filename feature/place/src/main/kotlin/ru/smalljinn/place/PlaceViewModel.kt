@@ -169,10 +169,12 @@ class PlaceViewModel @Inject constructor(
                     place = getPlaceToInsert(),
                     imagesToDelete = _deletedImages.toSet()
                 )
+                val newImages = imagesRepository.getPlaceImages(initialPlace.id)
                 //insertPlaceResultId != -1L - if place updated
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
-                _images.update { imagesRepository.getPlaceImages(initialPlace.id) }
+                initialPlace = initialPlace.copy(images = newImages)
+                _images.update { newImages }
             } catch (e: InvalidPlaceException) {
                 isCanceled = true
                 _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
@@ -195,9 +197,12 @@ class PlaceViewModel @Inject constructor(
     )
 
     fun cancelChanges() {
-        //TODO restore logic
-        resetPlaceProperties()
-        endEditing()
+        if (initialPlace.id == Place.CREATION_ID) {
+            _eventChannel.trySend(PlaceUiEvent.NavigateBack)
+        } else {
+            endEditing()
+            resetPlaceProperties()
+        }
     }
 
     fun deletePlace() {
@@ -208,7 +213,6 @@ class PlaceViewModel @Inject constructor(
 
     fun startEditing() {
         _isEditing.update { true }
-        savedStateHandle["isEditing"] = true
     }
 
     private fun endEditing() {
@@ -226,9 +230,6 @@ class PlaceViewModel @Inject constructor(
 
     private fun resetPlaceProperties() {
         with(initialPlace) {
-            savedStateHandle["title"] = title
-            savedStateHandle["description"] = description
-
             _placePosition.update { position }
             _creationDate.update { creationDate }
             _images.update { images }
@@ -247,6 +248,7 @@ internal data class PlaceDetailState(
 
 internal sealed interface PlaceUiEvent {
     data class ShowMessage(@StringRes val messageId: Int) : PlaceUiEvent
+    data object NavigateBack: PlaceUiEvent
 }
 
 internal data class PlacePositionState(
@@ -265,8 +267,4 @@ internal sealed interface PlaceDetailUiState {
 internal sealed interface InitialMode {
     data object Creation : InitialMode
     data class View(val placeId: Long) : InitialMode
-}
-
-internal sealed interface CreationEvent {
-    data object CancelCreation : CreationEvent
 }
