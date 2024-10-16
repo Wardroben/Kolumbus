@@ -15,7 +15,7 @@ data class Place(
 ) {
     companion object {
         fun getInitPlace() = Place(
-            id = 0,
+            id = -1L,
             title = "",
             description = "",
             position = Position(0.0,0.0),
@@ -24,5 +24,6 @@ data class Place(
             favorite = false,
             images = emptyList()
         )
+        const val CREATION_ID = -1L
     }
 }
