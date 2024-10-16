@@ -169,10 +169,10 @@ class PlaceViewModel @Inject constructor(
                     place = getPlaceToInsert(),
                     imagesToDelete = _deletedImages.toSet()
                 )
-                val newImages = imagesRepository.getPlaceImages(initialPlace.id)
                 //insertPlaceResultId != -1L - if place updated
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
+                val newImages = imagesRepository.getPlaceImages(initialPlace.id)
                 initialPlace = initialPlace.copy(images = newImages)
                 _images.update { newImages }
             } catch (e: InvalidPlaceException) {
@@ -200,8 +200,8 @@ class PlaceViewModel @Inject constructor(
         if (initialPlace.id == Place.CREATION_ID) {
             _eventChannel.trySend(PlaceUiEvent.NavigateBack)
         } else {
-            endEditing()
             resetPlaceProperties()
+            endEditing()
         }
     }
 
