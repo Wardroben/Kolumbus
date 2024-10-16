@@ -2,8 +2,8 @@
 <resources>
     <string name="back_cd">Back</string>
     <string name="share_place_cd">Share place</string>
-    <string name="title_optional_cd">Title (optional)</string>
-    <string name="description_cd">Description</string>
+    <string name="title_cd">Title</string>
+    <string name="description_cd">Description (optional)</string>
     <string name="delete_place_cd">Delete place</string>
     <string name="edit_place_cd">Edit place</string>
     <string name="take_a_photo_cd">Take a photo</string>

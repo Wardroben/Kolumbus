@@ -410,7 +410,7 @@ private fun LazyListScope.placeDetailBody(
                 readOnly = !isEditing,
                 onTextChanged = onTitleChanged,
                 style = MaterialTheme.typography.titleLarge,
-                hintText = stringResource(R.string.title_optional_cd),
+                hintText = stringResource(R.string.title_cd),
                 shouldShowHint = isEditing && placeDetailState.title.isBlank(),
                 imeAction = ImeAction.Next,
                 modifier = Modifier.padding(horizontal = 16.dp)
