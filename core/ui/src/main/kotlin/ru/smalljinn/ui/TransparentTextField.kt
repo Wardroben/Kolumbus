@@ -42,7 +42,7 @@ fun TransparentTextField(
         )
         hintText?.let {
             if (shouldShowHint) {
-                Text(hintText, style = style)
+                Text(hintText, style = style.copy(color = style.color.copy(alpha = 0.7f)))
             }
         }
     }
