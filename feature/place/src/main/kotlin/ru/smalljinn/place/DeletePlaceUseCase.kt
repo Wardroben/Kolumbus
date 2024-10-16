@@ -2,7 +2,6 @@ package ru.smalljinn.place
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import ru.smalljinn.kolumbus.data.repository.ImageRepository
 import ru.smalljinn.kolumbus.data.repository.PlacesRepository
@@ -16,7 +15,7 @@ class DeletePlaceUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(placeId: Long) {
         withContext(Dispatchers.IO) {
-            val placeImages = imageRepository.getPlaceImagesStream(placeId).first()
+            val placeImages = imageRepository.getPlaceImages(placeId)
             if (placeImages.isNotEmpty()) placeImages.forEach { image ->
                 imageRepository.deleteImage(image)
             }

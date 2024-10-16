@@ -17,7 +17,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -166,11 +165,14 @@ class PlaceViewModel @Inject constructor(
         var isCanceled = false
         viewModelScope.launch {
             try {
-                val insertPlaceResultId =
-                    savePlaceUseCase(place = getPlaceToInsert(), imagesToDelete = _deletedImages.toSet())
+                val insertPlaceResultId = savePlaceUseCase(
+                    place = getPlaceToInsert(),
+                    imagesToDelete = _deletedImages.toSet()
+                )
+                //insertPlaceResultId != -1L - if place updated
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
-                _images.update { imagesRepository.getPlaceImagesStream(initialPlace.id).first() }
+                _images.update { imagesRepository.getPlaceImages(initialPlace.id) }
             } catch (e: InvalidPlaceException) {
                 isCanceled = true
                 _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
@@ -244,7 +246,7 @@ internal data class PlaceDetailState(
 )
 
 internal sealed interface PlaceUiEvent {
-    data class ShowMessage(@StringRes val messageId: Int): PlaceUiEvent
+    data class ShowMessage(@StringRes val messageId: Int) : PlaceUiEvent
 }
 
 internal data class PlacePositionState(

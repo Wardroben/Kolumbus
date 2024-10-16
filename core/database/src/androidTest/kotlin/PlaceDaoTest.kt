@@ -1,7 +1,6 @@
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Instant
 import org.junit.After
@@ -75,7 +74,7 @@ class PlaceDaoTest {
         )
         imageDao.insertImages(placeImageEntities)
 
-        val placeImages = imageDao.getPlaceImagesStream(placeEntityWithImages.id).first()
+        val placeImages = imageDao.getPlaceImages(placeEntityWithImages.id)
         val placeImagesCount = placeImageEntities.filter { it.placeId == placeEntityWithImages.id }.size
         assertEquals(placeImagesCount, placeImages.size)
     }

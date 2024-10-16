@@ -4,8 +4,6 @@ import android.net.Uri
 import android.util.Log
 import androidx.core.net.toUri
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import ru.smalljinn.core.photo_store.PhotoManagerImpl
 import ru.smalljinn.database.dao.ImageDao
@@ -64,9 +62,7 @@ class OfflineImagesRepository @Inject constructor(
         return Result.Success(Unit)
     }
 
-    override fun getPlaceImagesStream(placeId: Long): Flow<List<Image>> {
-        return imageDao.getPlaceImagesStream(placeId).map { imageEntities ->
-            imageEntities.asModels()
-        }
+    override suspend fun getPlaceImages(placeId: Long): List<Image> {
+        return imageDao.getPlaceImages(placeId).asModels()
     }
 }
