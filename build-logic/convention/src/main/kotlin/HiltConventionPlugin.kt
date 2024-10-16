@@ -7,9 +7,9 @@ import ru.smalljinn.convention.libs
 class HiltConventionPlugin: Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            pluginManager.apply("org.jetbrains.kotlin.kapt")
+            pluginManager.apply("com.google.devtools.ksp")
             dependencies {
-                add("kapt", libs.findLibrary("hilt.compiler").get())
+                add("ksp", libs.findLibrary("hilt.compiler").get())
                 add("implementation", libs.findLibrary("hilt.core").get())
             }
             /** Add support for Android modules, based on [AndroidBasePlugin] */
