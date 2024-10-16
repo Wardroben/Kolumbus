@@ -163,6 +163,7 @@ class PlaceViewModel @Inject constructor(
 
     fun saveChanges() {
         _isDataProcessing.update { true }
+        var isCanceled = false
         viewModelScope.launch {
             try {
                 val insertPlaceResultId =
@@ -170,11 +171,14 @@ class PlaceViewModel @Inject constructor(
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
                 _images.update { imagesRepository.getPlaceImagesStream(initialPlace.id).first() }
-                endEditing()
             } catch (e: InvalidPlaceException) {
+                isCanceled = true
                 _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
             }
-        }.invokeOnCompletion { _isDataProcessing.update { false } }
+        }.invokeOnCompletion {
+            _isDataProcessing.update { false }
+        }
+        if (!isCanceled) endEditing()
     }
 
     private fun getPlaceToInsert(): Place = initialPlace.copy(

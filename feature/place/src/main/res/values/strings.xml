@@ -9,6 +9,6 @@
     <string name="take_a_photo_cd">Take a photo</string>
     <string name="take_image_from_gallery_cd">Take images from gallery</string>
     <string name="loading_place">Loading place…</string>
-    <string name="empty_title_exception">Title can't be empty</string>
+    <string name="empty_title_exception">Title can not be empty</string>
     <string name="invalid_position_exception">Position invalid</string>
 </resources>
