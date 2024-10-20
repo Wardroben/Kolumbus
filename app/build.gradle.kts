@@ -2,6 +2,7 @@ plugins {
     id("kolumbus.android.application")
     id("kolumbus.android.application.compose")
     id("kolumbus.hilt")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -33,6 +34,11 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    secrets {
+        propertiesFileName = "secrets.properties"
+        defaultPropertiesFileName = "local.defaults.properties"
     }
 }
 

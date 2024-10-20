@@ -19,10 +19,15 @@ class PermissionManager @Inject constructor(
 ) {
     data class State(
         val hasCameraAccess: Boolean,
-        val hasLocationAccess: Boolean
+        val hasFineLocationAccess: Boolean,
+        val hasCoarseLocationAccess: Boolean,
     ) {
+        val hasAtLeastOneLocationAccess: Boolean
+            get() = hasFineLocationAccess || hasCoarseLocationAccess
+        val hasFullLocationAccess: Boolean
+            get() = hasFineLocationAccess && hasCoarseLocationAccess
         val hasAllAccess: Boolean
-            get() = hasCameraAccess && hasLocationAccess
+            get() = hasCameraAccess && hasFullLocationAccess
     }
 
     private val _state = MutableStateFlow(getState())
@@ -30,7 +35,8 @@ class PermissionManager @Inject constructor(
 
     private fun getState(): State = State(
         hasCameraAccess = hasAccess(CAMERA),
-        hasLocationAccess = hasAccess(listOf(ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION))
+        hasFineLocationAccess = hasAccess(ACCESS_FINE_LOCATION),
+        hasCoarseLocationAccess = hasAccess(ACCESS_COARSE_LOCATION),
     )
 
     suspend fun checkPermissions() {

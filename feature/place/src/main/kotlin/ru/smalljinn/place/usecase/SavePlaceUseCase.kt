@@ -1,4 +1,4 @@
-package ru.smalljinn.place
+package ru.smalljinn.place.usecase
 
 import android.util.Log
 import androidx.annotation.StringRes
@@ -9,6 +9,7 @@ import ru.smalljinn.kolumbus.data.repository.PlacesRepository
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.model.data.response.Result
+import ru.smalljinn.place.R
 import javax.inject.Inject
 
 private const val TAG = "SavePlaceUC"
@@ -21,6 +22,7 @@ class SavePlaceUseCase @Inject constructor(
     @Throws(InvalidPlaceException::class)
     suspend operator fun invoke(place: Place, imagesToDelete: Set<Image>): Long {
         if (place.title.isBlank()) throw InvalidPlaceException(R.string.empty_title_exception)
+        if (place.position.isInit) throw InvalidPlaceException(R.string.invalid_position_label)
         //if (place.isPlaceInvalid) throw InvalidPlaceException(R.string.invalid_position_exception)
 
         return withContext(Dispatchers.IO) {

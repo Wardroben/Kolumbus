@@ -3,7 +3,10 @@ package ru.smalljinn.place
 import android.Manifest
 import android.app.Activity
 import android.net.Uri
+import android.util.Log
+import android.view.MotionEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
@@ -24,10 +27,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -53,10 +56,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.motionEventSpy
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -65,9 +71,11 @@ import androidx.core.app.ActivityCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.smalljinn.model.data.Image
+import ru.smalljinn.model.data.Position
 import ru.smalljinn.permissions.CameraPermissionTextProvider
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.ui.CreationDate
+import ru.smalljinn.ui.KolumbusMap
 import ru.smalljinn.ui.LoadingContent
 import ru.smalljinn.ui.ObserveAsEvents
 import ru.smalljinn.ui.RemovablePlaceImages
@@ -85,22 +93,35 @@ fun PlaceScreen(
 ) {
     val context = LocalContext.current
 
-    val placeUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    /*val placeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
+    val isDataProcessing by viewModel.isDataProcessing.collectAsStateWithLifecycle()*/
+    val placeUiState by viewModel.uiState1.collectAsStateWithLifecycle()
     val permissionState by viewModel.permissionState.collectAsStateWithLifecycle()
-    val isDataProcessing by viewModel.isDataProcessing.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.eventChannel) { event ->
-        when(event) {
+        when (event) {
             is PlaceUiEvent.ShowMessage -> onShowMessage(event.messageId)
             PlaceUiEvent.NavigateBack -> onBackClick()
         }
     }
 
+    var gpsRequestDenied by rememberSaveable { mutableStateOf(false) }
+    val gpsSettingsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartIntentSenderForResult()
+    ) { activityResult ->
+        if (activityResult.resultCode == Activity.RESULT_OK) {
+            gpsRequestDenied = false
+        } else {
+            gpsRequestDenied = true
+            Log.d("GPS", "Location denied")
+        }
+    }
+
     PlaceScreen(
         showBackButton = showBackButton,
-        isEditing = isEditing,
-        isDataProcessing = isDataProcessing,
+        isEditing = placeUiState.placeMode != PlaceMode.VIEW,
+        isDataProcessing = placeUiState.isDataProcessing,
         onBackClick = onBackClick,
         placeUiState = placeUiState,
         onRemoveImage = viewModel::removeImage,
@@ -118,20 +139,28 @@ fun PlaceScreen(
         onPhotoTaken = viewModel::addImage,
         permissionState = permissionState,
         onImagesTaken = viewModel::addImages,
-        getUriForPhoto = { viewModel.getUriForPhoto() }
+        getUriForPhoto = { viewModel.getUriForPhoto() },
+        onPlacePositionUpdated = viewModel::setPlacePosition,
+        onUserPositionUpdated = viewModel::setUserPosition,
+        onGpsUnavailableResolvable = { intentRequest ->
+            gpsSettingsLauncher.launch(intentRequest)
+        },
+        onShareClick = {TODO("Share action")},
+        isGpsRequestDenied = gpsRequestDenied
     )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun PlaceScreen(
-    placeUiState: PlaceDetailUiState,
+    placeUiState: PlaceDetailState,
     permissionState: PermissionManager.State,
     isEditing: Boolean,
     showBackButton: Boolean,
     onBackClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onEditClick: () -> Unit,
+    onShareClick: () -> Unit,
     onRemoveImage: (Image) -> Unit,
     onSaveChanges: () -> Unit,
     onCancelEditing: () -> Unit,
@@ -142,19 +171,27 @@ internal fun PlaceScreen(
     onImagesTaken: (List<Uri>) -> Unit,
     isDataProcessing: Boolean,
     getUriForPhoto: () -> Uri,
+    onGpsUnavailableResolvable: (IntentSenderRequest) -> Unit,
+    onUserPositionUpdated: (Position) -> Unit,
+    onPlacePositionUpdated: (Position) -> Unit,
+    isGpsRequestDenied: Boolean,
     modifier: Modifier = Modifier
 ) {
     val placeLazyListState = rememberLazyListState()
+    var columnScrollingEnabled by remember { mutableStateOf(true) }
     LazyColumn(
         modifier = modifier.imePadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        userScrollEnabled = columnScrollingEnabled,
         state = placeLazyListState
     ) {
         /*item {
             Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
         }*/
-        when (placeUiState) {
-            is PlaceDetailUiState.Success -> {
+        when {
+            placeUiState.error -> Unit //TODO("error content with retry button")
+            placeUiState.loading -> item { LoadingContent(stringResource(R.string.loading_place)) }
+            else -> {
                 stickyHeader {
                     PlaceToolbar(
                         isEditing = isEditing,
@@ -162,17 +199,17 @@ internal fun PlaceScreen(
                         onBackClick = onBackClick,
                         onDeleteClick = onDeleteClick,
                         onEditClick = onEditClick,
-                        onShareClick = { TODO("Share action") },
+                        onShareClick = onShareClick,
                         onSaveChanges = onSaveChanges,
                         onCancelEditing = onCancelEditing,
                         isDataProcessing = isDataProcessing,
-                        canSave = with(placeUiState.placeDetailState) {
+                        canSave = with(placeUiState) {
                             title.isNotBlank() && images.isNotEmpty()
                         }
                     )
                 }
                 placeDetailBody(
-                    placeDetailState = placeUiState.placeDetailState,
+                    placeDetailState = placeUiState,
                     isEditing = isEditing,
                     onRemoveImage = onRemoveImage,
                     onDescriptionChanged = onDescriptionChanged,
@@ -181,19 +218,25 @@ internal fun PlaceScreen(
                     onOpenSettings = onOpenSettings,
                     permissionState = permissionState,
                     onImagesTaken = onImagesTaken,
-                    getUriForPhoto = getUriForPhoto
+                    getUriForPhoto = getUriForPhoto,
+                    onGpsUnavailableResolvable = onGpsUnavailableResolvable,
+                    onUserPositionUpdated = onUserPositionUpdated,
+                    onPlacePositionUpdated = onPlacePositionUpdated,
+                    onMapCameraMoving = { isMapCameraMoving ->
+                        columnScrollingEnabled = !isMapCameraMoving
+                    },
+                    isGpsRequestDenied = isGpsRequestDenied
                 )
                 item {
                     Spacer(
                         Modifier.windowInsetsBottomHeight(
-                            WindowInsets.ime
+                            WindowInsets.systemBars
                         )
                     )
                 }
             }
 
-            is PlaceDetailUiState.Error -> Unit //TODO("error content with retry button")
-            PlaceDetailUiState.Loading -> item { LoadingContent(stringResource(R.string.loading_place)) }
+
         }
     }
 }
@@ -385,6 +428,7 @@ private fun TakeMediaImagesButton(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 private fun LazyListScope.placeDetailBody(
     placeDetailState: PlaceDetailState,
     isEditing: Boolean,
@@ -395,7 +439,12 @@ private fun LazyListScope.placeDetailBody(
     onPhotoTaken: (Uri) -> Unit,
     onImagesTaken: (List<Uri>) -> Unit,
     permissionState: PermissionManager.State,
-    getUriForPhoto: () -> Uri
+    onUserPositionUpdated: (Position) -> Unit,
+    onPlacePositionUpdated: (Position) -> Unit,
+    onGpsUnavailableResolvable: (IntentSenderRequest) -> Unit,
+    getUriForPhoto: () -> Uri,
+    isGpsRequestDenied: Boolean,
+    onMapCameraMoving: (Boolean) -> Unit
 ) {
     item {
         //images lazy row
@@ -410,7 +459,33 @@ private fun LazyListScope.placeDetailBody(
             getUriForPhoto = getUriForPhoto
         )
     }
-    //TODO map
+    item {
+        KolumbusMap(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .padding(horizontal = 16.dp)
+                .motionEventSpy {
+                    if (isEditing) {
+                        when (it.action) {
+                            MotionEvent.ACTION_DOWN -> onMapCameraMoving(true)
+                            MotionEvent.ACTION_UP -> onMapCameraMoving(false)
+                        }
+                    }
+                },
+            //TODO if placePosition null and userPosition null
+            placePosition = placeDetailState.placePosition ?: Position(53.7222971, 91.4157491),
+            userPosition = placeDetailState.userPosition ?: Position.initialPosition(),
+            onUserPositionUpdated = onUserPositionUpdated,
+            onPlacePositionUpdated = onPlacePositionUpdated,
+            onGpsUnavailableResolvable = onGpsUnavailableResolvable,
+            hasLocationPermission = permissionState.hasAtLeastOneLocationAccess,
+            usePreciseLocation = permissionState.hasFineLocationAccess,
+            isPlaceEditing = isEditing,
+            isPlaceCreating = placeDetailState.placeMode == PlaceMode.CREATING,
+            isGpsRequestDenied = isGpsRequestDenied
+        )
+    }
     item {
         //title
         TransparentTextField(
@@ -494,7 +569,9 @@ private fun PlaceEditingButtons(
     canSave: Boolean
 ) {
     Row(
-        Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {

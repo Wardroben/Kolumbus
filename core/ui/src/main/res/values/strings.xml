@@ -4,4 +4,6 @@
     <string name="open_settings">Open settings</string>
     <string name="cancel">Cancel</string>
     <string name="no_places_placeholder">There not created places. Make new by clicking \"+\"</string>
+    <string name="follow_my_position_cd">Follow my position</string>
+    <string name="track_location_unavailable">Track location unavailable</string>
 </resources>

@@ -1,5 +1,5 @@
 [versions]
-agp = "8.6.1"
+agp = "8.7.1"
 androidDesugarJdkLibs = "2.1.2"
 kotlin = "2.0.20"
 coreKtx = "1.13.1"
@@ -8,22 +8,26 @@ junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.6"
 activityCompose = "1.9.2"
-composeBom = "2024.09.02"
+composeBom = "2024.09.03"
 ksp = "2.0.20-1.0.25"
 androidxHilt = "1.2.0"
+mapsCompose = "6.1.0"
 room = "2.6.1"
 androidxNavigation = "2.8.2"
 androidxLifecycle = "2.8.6"
 hilt = "2.52"
 coil = "2.7.0"
 kotlinxSerializationJson = "1.7.3"
-kotlinxDatetime = "0.5.0"
+kotlinxDatetime = "0.6.1"
 jetbrainsKotlinJvm = "2.0.20"
 appcompat = "1.7.0"
 material = "1.12.0"
 kotlinxCoroutines = "1.9.0"
 androidxTestCore = "1.6.1"
 androidxTestRunner = "1.6.2"
+secretsGradlePlugin = "2.0.1"
+playServicesMaps = "19.0.0"
+playServicesLocation = "21.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +62,10 @@ androidx-hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-com
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "androidxNavigation" }
 
 
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
+gms-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+gms-location = {group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation"}
+
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -80,6 +88,7 @@ room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", vers
 
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -100,5 +109,5 @@ kolumbus-android-room = { id = "kolumbus.android.room" }
 kolumbus-android-library = { id = "kolumbus.android.library" }
 kolumbus-jvm-library = { id = "kolumbus.jvm.library" }
 kolumbus-android-library-compose = { id = "kolumbus.android.library.compose" }
-kolumbus-android-application = { id = "kolumbus.android.application"}
-kolumbus-android-application-compose = { id = "kolumbus.android.application.compose"}
+kolumbus-android-application = { id = "kolumbus.android.application" }
+kolumbus-android-application-compose = { id = "kolumbus.android.application.compose" }

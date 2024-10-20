@@ -1,4 +1,4 @@
-package ru.smalljinn.place
+package ru.smalljinn.place.usecase
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers

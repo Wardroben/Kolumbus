@@ -15,4 +15,5 @@
     <string name="save_action">Save</string>
     <string name="editing_mode_label">Changeable</string>
     <string name="no_images_label">No images</string>
+    <string name="invalid_position_label">Invalid position</string>
 </resources>

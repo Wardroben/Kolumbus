@@ -106,14 +106,14 @@ fun PlacesListDetailScreen(
     }
     val nestedNavController = key(nestedNavKey) { rememberNavController() }
 
-    fun onPlaceClickShowDetailPane(placeId: Long) {
+    fun onPlaceClickShowDetailPane(placeId: Long, isCreating: Boolean = false) {
         onPlaceClick(placeId)
         if (listDetailNavigator.isDetailPaneVisible()) {
-            nestedNavController.navigateToPlace(placeId) {
+            nestedNavController.navigateToPlace(placeId, isCreating) {
                 popUpTo<DetailPaneNavHostRoute>()
             }
         } else {
-            nestedNavHostStartRoute = PlaceRoute(id = placeId)
+            nestedNavHostStartRoute = PlaceRoute(id = placeId, isCreating)
             nestedNavKey = UUID.randomUUID()
         }
         listDetailNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
@@ -136,8 +136,7 @@ fun PlacesListDetailScreen(
                 Scaffold(
                     floatingActionButton = {
                         FloatingActionButton(onClick = {
-                            //TODO make creation logic with navigation to empty place
-                            onPlaceClickShowDetailPane(placeId = -1L)
+                            onPlaceClickShowDetailPane(placeId = -1L, isCreating = true)
                         }) {
                             Icon(
                                 Icons.Default.Add,

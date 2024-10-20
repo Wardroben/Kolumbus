@@ -12,6 +12,10 @@ dependencies {
     api(libs.androidx.material3)
     implementation(project(":core:permissions"))
 
+    //implementation(libs.gms.maps)
+    implementation(libs.gms.location)
+    implementation(libs.maps.compose)
+
     //api(libs.androidx.compose.ui)
     implementation(libs.coil)
 

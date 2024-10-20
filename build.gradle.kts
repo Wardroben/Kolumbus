@@ -4,6 +4,9 @@ buildscript {
         google()
         mavenCentral()
     }
+    dependencies {
+        classpath(libs.secrets.gradle.plugin)
+    }
 }
 plugins {
     alias(libs.plugins.android.application) apply false
