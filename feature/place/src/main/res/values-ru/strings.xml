@@ -15,4 +15,5 @@
     <string name="save_action">Сохранить</string>
     <string name="editing_mode_label">Изменяемый</string>
     <string name="no_images_label">Изображений нет</string>
+    <string name="invalid_position_label">Некорректное местоположение</string>
 </resources>
