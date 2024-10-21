@@ -330,7 +330,8 @@ private fun PlaceImagesRow(
                         readyToDelete = isEditing,
                         url = image.url
                     )
-                    if (showHeaderImageControls) {
+                    //image id == 0 is image to create
+                    if (showHeaderImageControls && image.id != 0L) {
                         IconButton(
                             onClick = { if (headerImageId != image.id) onSetHeaderImage(image.id) },
                             modifier = Modifier.padding(10.dp)
@@ -512,7 +513,7 @@ private fun LazyListScope.placeDetailBody(
             getUriForPhoto = getUriForPhoto,
             onSetHeaderImage = onSetHeaderImage,
             headerImageId = placeDetailState.headerImageId,
-            showHeaderImageControls = placeDetailState.placeMode != PlaceMode.CREATING
+            showHeaderImageControls = placeDetailState.placeMode == PlaceMode.VIEW
         )
     }
     item {

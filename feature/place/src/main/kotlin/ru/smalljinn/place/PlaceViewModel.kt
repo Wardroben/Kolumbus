@@ -176,6 +176,7 @@ class PlaceViewModel @Inject constructor(
     fun getSettingsIntent() = permissionManager.createSettingsIntent()
 
     fun setHeaderImage(id: Long) {
+        if (id == 0L) return
         _uiState.update { it.copy(headerImageId = id) }
         viewModelScope.launch {
             savePlaceUseCase(
