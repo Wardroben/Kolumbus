@@ -89,6 +89,7 @@ class PlaceViewModel @Inject constructor(
 
     fun removeImage(image: Image) {
         _uiState.update { it.copy(images = uiState1.value.images.minus(image)) }
+        _deletedImages.add(image)
     }
 
     fun addImage(uri: Uri) {
