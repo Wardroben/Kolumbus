@@ -65,6 +65,7 @@ fun Position.toLatLng() = LatLng(latitude, longitude)
 fun LatLng.toPosition() = Position(latitude, longitude)
 fun Location.toPosition() = Position(latitude, longitude)
 private const val MAP_POSITION_ANIMATION_DURATION = 500
+private const val MAP_ZOOM = 16.5f
 
 @SuppressLint("MissingPermission")
 @Composable
@@ -79,13 +80,14 @@ fun KolumbusMap(
     followUserPositionAtStart: Boolean,
     shouldReceivePositionUpdates: Boolean,
     isGpsRequestDenied: Boolean,
+    showNoLocationPermissionsRationale: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
     var followUserPosition by rememberSaveable(followUserPositionAtStart) {
         mutableStateOf(followUserPositionAtStart)
     }
-    var zoom by remember { mutableFloatStateOf(17f) }
+    var zoom by remember { mutableFloatStateOf(MAP_ZOOM) }
     val cameraPositionState = rememberCameraPositionState()
 
     fun animateCamera(position: LatLng) {
@@ -124,10 +126,10 @@ fun KolumbusMap(
             && cameraPositionState.isMoving
         ) {
             followUserPosition = false
+            zoom = cameraPositionState.position.zoom
         } else if (!cameraPositionState.isMoving) {
             if (shouldReceivePositionUpdates) with(cameraPositionState.position) {
                 onPlacePositionUpdated(target.toPosition())
-                zoom = this.zoom
             }
         }
     }
@@ -172,7 +174,7 @@ fun KolumbusMap(
             FollowPositionButton(
                 followingUserPosition = followUserPosition,
                 hasLocationPermission = hasLocationPermission,
-                showNoLocationPermissionsRationale = { TODO() }
+                showNoLocationPermissionsRationale = showNoLocationPermissionsRationale
             ) { followUserPosition = it }
         }
     }

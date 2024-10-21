@@ -117,7 +117,6 @@ fun PlaceScreen(
     }
 
     var showDialogForLocationPermission by rememberSaveable { mutableStateOf(false) }
-    var userDeniedLocationPermissionNow by rememberSaveable { mutableStateOf(false) }
     val openSettings = {
         context.startActivity(viewModel.getSettingsIntent())
         showDialogForLocationPermission = false
@@ -125,9 +124,7 @@ fun PlaceScreen(
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permission: Map<String, Boolean> ->
-        if (!userDeniedLocationPermissionNow
-            && permission.all { perm -> !perm.value }
-        ) showDialogForLocationPermission = true
+        if (permission.all { perm -> !perm.value }) showDialogForLocationPermission = true
         else viewModel.updatePermissions()
     }
     if (showDialogForLocationPermission && placeUiState.placeMode != PlaceMode.VIEW) {
@@ -135,7 +132,6 @@ fun PlaceScreen(
             onOpenSettings = openSettings,
             onDismiss = {
                 showDialogForLocationPermission = false
-                userDeniedLocationPermissionNow = true
             },
             textProvider = LocationPermissionTextProvider(),
             isPermanentlyDeclined = !ActivityCompat.shouldShowRequestPermissionRationale(
@@ -176,9 +172,7 @@ fun PlaceScreen(
             gpsSettingsLauncher.launch(intentRequest)
         },
         onShareClick = { TODO("Share action") },
-        onRequestLocationPermission = {
-            if (!userDeniedLocationPermissionNow) showDialogForLocationPermission = true
-        },
+        onRequestLocationPermission = { showDialogForLocationPermission = true },
         isGpsRequestDenied = gpsRequestDenied
     )
 }
@@ -241,7 +235,6 @@ internal fun PlaceScreen(
                         }
                     )
                 }
-                if (!permissionState.hasAtLeastOneLocationAccess) onRequestLocationPermission()
                 placeDetailBody(
                     placeDetailState = placeUiState,
                     onRemoveImage = onRemoveImage,
@@ -258,7 +251,8 @@ internal fun PlaceScreen(
                     onMapCameraMoving = { isMapCameraMoving ->
                         columnScrollingEnabled = !isMapCameraMoving
                     },
-                    isGpsRequestDenied = isGpsRequestDenied
+                    isGpsRequestDenied = isGpsRequestDenied,
+                    onRequestLocationPermission = onRequestLocationPermission
                 )
                 item {
                     Spacer(
@@ -476,6 +470,7 @@ private fun LazyListScope.placeDetailBody(
     onGpsUnavailableResolvable: (IntentSenderRequest) -> Unit,
     getUriForPhoto: () -> Uri,
     isGpsRequestDenied: Boolean,
+    onRequestLocationPermission: () -> Unit,
     onMapCameraMoving: (Boolean) -> Unit
 ) {
     item {
@@ -515,7 +510,8 @@ private fun LazyListScope.placeDetailBody(
             usePreciseLocation = permissionState.hasFineLocationAccess,
             shouldReceivePositionUpdates = placeDetailState.placeMode != PlaceMode.VIEW,
             isGpsRequestDenied = isGpsRequestDenied,
-            followUserPositionAtStart = placeDetailState.placeMode == PlaceMode.CREATING
+            followUserPositionAtStart = placeDetailState.placeMode == PlaceMode.CREATING,
+            showNoLocationPermissionsRationale = onRequestLocationPermission
         )
     }
     item {

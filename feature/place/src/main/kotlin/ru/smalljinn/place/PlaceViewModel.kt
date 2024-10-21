@@ -47,16 +47,12 @@ class PlaceViewModel @Inject constructor(
         route.id == Place.CREATION_ID -> InitialMode.Editing(route.id)
         else -> InitialMode.View(route.id)
     }
-    /*private val initialMode = when (val placeId = savedStateHandle.toRoute<PlaceRoute>().id) {
-        Place.CREATION_ID -> InitialMode.Creation
-        else -> InitialMode.View(placeId)
-    }*/
 
     private lateinit var initialPlace: Place
 
     val permissionState = permissionManager.state
 
-    private val _uiState = MutableStateFlow<PlaceDetailState>(PlaceDetailState())
+    private val _uiState = MutableStateFlow(PlaceDetailState())
     internal val uiState1 = _uiState.asStateFlow()
 
     init {
@@ -83,14 +79,6 @@ class PlaceViewModel @Inject constructor(
                     loading = false
                 )
             }
-
-            /*title = place.title
-            description = place.description
-
-            _images.update { it.plus(place.images) }
-            _placePosition.update { place.position }
-            _headerImageId.update { place.headerImageId }
-            _creationDate.update { place.creationDate }*/
         }
     }
 
@@ -186,7 +174,6 @@ class PlaceViewModel @Inject constructor(
 
     private fun endEditing() {
         _deletedImages.clear()
-
         _uiState.update { it.copy(placeMode = PlaceMode.VIEW) }
     }
 
