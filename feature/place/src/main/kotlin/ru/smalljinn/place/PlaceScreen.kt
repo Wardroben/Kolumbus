@@ -119,13 +119,14 @@ fun PlaceScreen(
     var showDialogForLocationPermission by rememberSaveable { mutableStateOf(false) }
     val openSettings = {
         context.startActivity(viewModel.getSettingsIntent())
+        viewModel.updatePermissions()
         showDialogForLocationPermission = false
     }
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permission: Map<String, Boolean> ->
         if (permission.all { perm -> !perm.value }) showDialogForLocationPermission = true
-        else viewModel.updatePermissions()
+        viewModel.updatePermissions()
     }
     if (showDialogForLocationPermission && placeUiState.placeMode != PlaceMode.VIEW) {
         PermissionExplanationDialog(
@@ -134,7 +135,7 @@ fun PlaceScreen(
                 showDialogForLocationPermission = false
             },
             textProvider = LocationPermissionTextProvider(),
-            isPermanentlyDeclined = !ActivityCompat.shouldShowRequestPermissionRationale(
+            isPermanentlyDeclined = ActivityCompat.shouldShowRequestPermissionRationale(
                 context as Activity,
                 PermissionManager.locationPermissions.first()
             ),
