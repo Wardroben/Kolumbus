@@ -46,7 +46,7 @@ class PlacesViewModel @Inject constructor(
 
             is PlaceEvent.MakeFavorite -> with(event) {
                 viewModelScope.launch {
-                    placesRepository.upsertPlace(place.copy(favorite = favorite))
+                    placesRepository.upsertPlace(place.copy(favorite = favorite, images = emptyList()))
                 }
             }
 

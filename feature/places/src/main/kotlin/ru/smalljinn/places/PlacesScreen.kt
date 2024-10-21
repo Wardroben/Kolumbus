@@ -22,9 +22,7 @@ fun PlacesRoute(
     viewmodel: PlacesViewModel = hiltViewModel()
 ) {
     val placesState by viewmodel.placesState.collectAsStateWithLifecycle()
-    /*val selectedPlaceId by viewmodel.selectedPlaceId.collectAsState()
-    val isPlacesLoading = placesState is PlacesUiState.Loading
-    val isNoPlaces = placesState is PlacesUiState.Empty*/
+
     PlacesScreen(
         uiState = placesState,
         onPlaceClick = { placeId ->
@@ -37,17 +35,6 @@ fun PlacesRoute(
         highlightSelectedPlace = highlightSelectedPlace,
         modifier = modifier
     )
-    /*PlacesScreen(
-        selectedPlaceId = selectedPlaceId,
-        isNoPlaces = isNoPlaces,
-        isPlacesLoading = isPlacesLoading,
-        placesState = placesState,
-        onPlaceClicked = onPlaceClicked,
-        onPlaceFavoriteChanged = { place, favorite ->
-            viewmodel.obtainEvent(PlaceEvent.MakeFavorite(place, favorite))
-        },
-        modifier = modifier
-    )*/
 }
 
 @Composable
