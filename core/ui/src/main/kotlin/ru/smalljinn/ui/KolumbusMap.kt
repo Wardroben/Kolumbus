@@ -13,7 +13,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
@@ -80,6 +83,8 @@ fun KolumbusMap(
     followUserPositionAtStart: Boolean,
     shouldReceivePositionUpdates: Boolean,
     isGpsRequestDenied: Boolean,
+    shouldShowPlaceMarker: Boolean,
+    shouldShowPlacePositionEditingMarker: Boolean,
     showNoLocationPermissionsRationale: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -158,10 +163,18 @@ fun KolumbusMap(
 
             modifier = Modifier.matchParentSize()
         ) {
-            if (!shouldReceivePositionUpdates && !placePosition.isInit) {
+            if (shouldShowPlaceMarker && !placePosition.isInit) {
                 val placeMarker = rememberMarkerState(position = placePosition.toLatLng())
                 Marker(state = placeMarker)
             }
+        }
+        if (shouldShowPlacePositionEditingMarker) {
+            Icon(
+                Icons.Default.LocationOn,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.align(Alignment.Center).padding(bottom = 36.dp).size(48.dp)
+            )
         }
         AnimatedVisibility(
             visible = shouldReceivePositionUpdates,

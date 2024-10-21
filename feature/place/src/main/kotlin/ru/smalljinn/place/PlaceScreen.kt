@@ -360,7 +360,6 @@ private fun PlaceImagesRow(
                     getUriForPhoto = getUriForPhoto,
                     modifier = Modifier.weight(1f)
                 )
-                //TODO change button
                 TakeMediaImagesButton(
                     onImagesTaken = onImagesTaken,
                     modifier = Modifier.weight(1f)
@@ -541,7 +540,9 @@ private fun LazyListScope.placeDetailBody(
             shouldReceivePositionUpdates = placeDetailState.placeMode != PlaceMode.VIEW,
             isGpsRequestDenied = isGpsRequestDenied,
             followUserPositionAtStart = placeDetailState.placeMode == PlaceMode.CREATING,
-            showNoLocationPermissionsRationale = onRequestLocationPermission
+            showNoLocationPermissionsRationale = onRequestLocationPermission,
+            shouldShowPlaceMarker = placeDetailState.placeMode == PlaceMode.VIEW,
+            shouldShowPlacePositionEditingMarker = placeDetailState.placeMode != PlaceMode.VIEW
         )
     }
     item {
@@ -556,7 +557,6 @@ private fun LazyListScope.placeDetailBody(
             imeAction = ImeAction.Next,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
-        //TODO favorite button
     }
     item {
         CreationDate(
