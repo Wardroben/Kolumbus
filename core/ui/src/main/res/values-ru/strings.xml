@@ -6,4 +6,6 @@
     <string name="no_places_placeholder">Нет созданных мест. Создай новое нажав \"+\"</string>
     <string name="follow_my_position_cd">Следовать моему местоположению</string>
     <string name="track_location_unavailable">Следование местоположению недоступно</string>
+    <string name="delete_place_text">Вы действительно хотите удалить место: %1$s</string>
+    <string name="delete_place_title">Подтверждение удаления</string>
 </resources>
