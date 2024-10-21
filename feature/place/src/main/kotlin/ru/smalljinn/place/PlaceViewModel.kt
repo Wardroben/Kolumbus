@@ -75,7 +75,7 @@ class PlaceViewModel @Inject constructor(
                     images = place.images,
                     creationDate = place.creationDate,
                     headerImageId = place.headerImageId,
-                    placeMode = when(initialMode) {
+                    placeMode = when (initialMode) {
                         is InitialMode.Editing -> PlaceMode.EDITING
                         is InitialMode.View -> PlaceMode.VIEW
                         InitialMode.Creation -> PlaceMode.CREATING
@@ -99,68 +99,11 @@ class PlaceViewModel @Inject constructor(
 
     private val _deletedImages = mutableListOf<Image>()
 
-    /*private val _isDataProcessing = MutableStateFlow(false)
-    val isDataProcessing = _isDataProcessing.asStateFlow()
-
-    private val _isEditing = MutableStateFlow(initialMode is InitialMode.Creation)
-    val isEditing = _isEditing.asStateFlow()
-
-    private var title by mutableStateOf("")
-    private var description by mutableStateOf("")
-
-    private val _images = MutableStateFlow<List<Image>>(emptyList())
-
-
-    private val _placePosition = MutableStateFlow<Position?>(null)
-
-    //TODO make dataStore where save last user position
-    private val _userPosition = MutableStateFlow<Position?>(null)
-    private val _headerImageId = MutableStateFlow<Long?>(null)
-    private val _creationDate = MutableStateFlow(Clock.System.now())
-
-    private val _placePositionState = combine(
-        _placePosition,
-        _userPosition
-    ) { placePosition, userPosition ->
-        PlacePositionState(userPosition, placePosition)
-    }
-
-    internal val uiState: StateFlow<PlaceDetailUiState> = combine(
-        snapshotFlow { title },
-        snapshotFlow { description },
-        _images,
-        _placePositionState,
-        _creationDate
-    ) { title, description, images, placePositionState, creationDate ->
-        PlaceDetailUiState.Success(
-            PlaceDetailState(
-                title = title,
-                description = description,
-                images = images,
-                userPosition = placePositionState.userPosition,
-                placePosition = placePositionState.placePosition,
-                creationDate = creationDate
-            )
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000L),
-        initialValue = PlaceDetailUiState.Loading
-    )*/
-
     fun removeImage(image: Image) {
-        /*if (image.id != 0L) _deletedImages.add(image)
-        _images.update { it.minus(image) }*/
-
         _uiState.update { it.copy(images = uiState1.value.images.minus(image)) }
     }
 
     fun addImage(uri: Uri) {
-        /*val duplicate = _images.value.find { it.url == uri.toString() }
-        if (duplicate != null) return
-        val newImage = Image(id = 0, url = uri.toString())
-        _images.update { it.plus(newImage) }*/
-
         val duplicate = uiState1.value.images.find { it.url == uri.toString() }
         if (duplicate != null) return
         val newImage = Image(id = 0, url = uri.toString())
@@ -177,67 +120,37 @@ class PlaceViewModel @Inject constructor(
 
     @JvmName(name = "setPlaceTitle")
     fun setTitle(text: String) {
-        //title = text
-
         _uiState.update { it.copy(title = text) }
     }
 
     @JvmName(name = "setPlaceDescription")
     fun setDescription(text: String) {
-        //description = text
-
         _uiState.update { it.copy(description = text) }
     }
 
     fun setUserPosition(position: Position) {
-        //_userPosition.update { position }
-
         _uiState.update { it.copy(userPosition = position) }
     }
 
     fun setPlacePosition(position: Position) {
-        //_placePosition.update { position }
-
         _uiState.update { it.copy(placePosition = position) }
     }
 
     fun saveChanges() {
         var isCanceled = false
-        /*_isDataProcessing.update { true }
 
-        viewModelScope.launch {
-            try {
-                val insertPlaceResultId = savePlaceUseCase(
-                    place = getPlaceToInsert(),
-                    imagesToDelete = _deletedImages.toSet()
-                )
-                //insertPlaceResultId != -1L - if place updated
-                if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
-                    initialPlace = initialPlace.copy(id = insertPlaceResultId)
-                val newImages = imagesRepository.getPlaceImages(initialPlace.id)
-                initialPlace = initialPlace.copy(images = newImages)
-                _images.update { newImages }
-            } catch (e: InvalidPlaceException) {
-                isCanceled = true
-                _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
-            }
-        }.invokeOnCompletion {
-            _isDataProcessing.update { false }
-        }
-        if (!isCanceled) endEditing()*/
-
-        //New logic
         setDataProcessing(true)
         viewModelScope.launch {
             try {
+                val placeToInsert = uiState1.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite)
                 val insertPlaceResultId = savePlaceUseCase(
-                    place = uiState1.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite),
+                    place = placeToInsert,
                     imagesToDelete = _deletedImages.toSet()
                 )
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
                 val newImages = imagesRepository.getPlaceImages(initialPlace.id)
-                initialPlace = initialPlace.copy(images = newImages)
+                initialPlace = initialPlace.copy(images = newImages, position = placeToInsert.position)
                 _uiState.update { it.copy(images = newImages) }
             } catch (e: InvalidPlaceException) {
                 isCanceled = true
@@ -249,16 +162,8 @@ class PlaceViewModel @Inject constructor(
         if (!isCanceled) endEditing()
     }
 
-    private fun setDataProcessing(processing: Boolean) = _uiState.update { it.copy(isDataProcessing = processing) }
-
-    /*private fun getPlaceToInsert(): Place = initialPlace.copy(
-        title = title,
-        description = description,
-        creationDate = _creationDate.value,
-        images = _images.value,
-        position = _placePosition.value
-            ?: Position.initialPosition() //TODO show error when null position
-    )*/
+    private fun setDataProcessing(processing: Boolean) =
+        _uiState.update { it.copy(isDataProcessing = processing) }
 
     fun cancelChanges() {
         if (initialPlace.id == Place.CREATION_ID) {
@@ -276,18 +181,16 @@ class PlaceViewModel @Inject constructor(
     fun getUriForPhoto(): Uri = photoManager.getUriForTakePhoto()
 
     fun startEditing() {
-        //_isEditing.update { true }
-
         _uiState.update { it.copy(placeMode = PlaceMode.EDITING) }
     }
 
     private fun endEditing() {
         _deletedImages.clear()
-        //_isEditing.update { false }
 
         _uiState.update { it.copy(placeMode = PlaceMode.VIEW) }
     }
 
+    fun updatePermissions() = viewModelScope.launch { permissionManager.checkPermissions() }
     fun getSettingsIntent() = permissionManager.createSettingsIntent()
     /*
      TODO make deletedImagesList which contains deleted images.
@@ -298,14 +201,13 @@ class PlaceViewModel @Inject constructor(
 
     private fun resetPlaceProperties() {
         with(initialPlace) {
-            /*_placePosition.update { position }
-            _creationDate.update { creationDate }
-            _images.update { images }*/
-            _uiState.update { it.copy(
-                placePosition = position,
-                creationDate = creationDate,
-                images = images
-            ) }
+            _uiState.update {
+                it.copy(
+                    placePosition = position,
+                    creationDate = creationDate,
+                    images = images
+                )
+            }
         }
     }
 }

@@ -17,6 +17,18 @@ import javax.inject.Inject
 class PermissionManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    companion object {
+        val locationPermissions by lazy {
+            arrayOf(
+                ACCESS_FINE_LOCATION,
+                ACCESS_COARSE_LOCATION
+            )
+        }
+        val cameraPermission by lazy {
+            CAMERA
+        }
+    }
+
     data class State(
         val hasCameraAccess: Boolean,
         val hasFineLocationAccess: Boolean,
@@ -34,7 +46,7 @@ class PermissionManager @Inject constructor(
     val state = _state.asStateFlow()
 
     private fun getState(): State = State(
-        hasCameraAccess = hasAccess(CAMERA),
+        hasCameraAccess = hasAccess(cameraPermission),
         hasFineLocationAccess = hasAccess(ACCESS_FINE_LOCATION),
         hasCoarseLocationAccess = hasAccess(ACCESS_COARSE_LOCATION),
     )

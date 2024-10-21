@@ -11,10 +11,9 @@ class CameraPermissionTextProvider : PermissionTextProvider {
 
 }
 
-class PositionPermissionTextProvider : PermissionTextProvider {
+class LocationPermissionTextProvider : PermissionTextProvider {
     override fun getDescriptionResId(isPermanentlyDeclined: Boolean): Int =
         if (isPermanentlyDeclined) R.string.location_permission_permanently_declined_description
         else R.string.location_permission_required_description
-
 
 }

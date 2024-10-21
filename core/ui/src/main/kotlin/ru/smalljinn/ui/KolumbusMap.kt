@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.FilledTonalIconToggleButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -52,7 +55,10 @@ import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberMarkerState
+import kotlinx.coroutines.launch
 import ru.smalljinn.model.data.Position
 
 fun Position.toLatLng() = LatLng(latitude, longitude)
@@ -70,42 +76,63 @@ fun KolumbusMap(
     onGpsUnavailableResolvable: (IntentSenderRequest) -> Unit,
     hasLocationPermission: Boolean,
     usePreciseLocation: Boolean,
-    isPlaceEditing: Boolean,
-    isPlaceCreating: Boolean,
+    followUserPositionAtStart: Boolean,
+    shouldReceivePositionUpdates: Boolean,
     isGpsRequestDenied: Boolean,
     modifier: Modifier = Modifier
 ) {
-    var followUserPosition by rememberSaveable(isPlaceCreating) { mutableStateOf(isPlaceCreating) }
+    val coroutineScope = rememberCoroutineScope()
+    var followUserPosition by rememberSaveable(followUserPositionAtStart) {
+        mutableStateOf(followUserPositionAtStart)
+    }
     var zoom by remember { mutableFloatStateOf(17f) }
     val cameraPositionState = rememberCameraPositionState()
-    //val currentPlacePositionChanged = rememberUpdatedState(onPlacePositionUpdated)
+
+    fun animateCamera(position: LatLng) {
+        val cameraUpdate = CameraUpdateFactory.newCameraPosition(
+            CameraPosition.fromLatLngZoom(position, zoom)
+        )
+        coroutineScope.launch {
+            cameraPositionState.animate(
+                cameraUpdate,
+                MAP_POSITION_ANIMATION_DURATION
+            )
+        }
+    }
 
     //Effect to track user position when it enabled
-    LaunchedEffect(hasLocationPermission, userPosition, followUserPosition, isPlaceEditing) {
-        if (isPlaceEditing && hasLocationPermission && followUserPosition && userPosition != Position.initialPosition()) {
-            val cameraUpdate = CameraUpdateFactory.newCameraPosition(
-                CameraPosition.fromLatLngZoom(userPosition.toLatLng(), zoom)
-            )
-            cameraPositionState.animate(cameraUpdate, MAP_POSITION_ANIMATION_DURATION)
+    LaunchedEffect(
+        hasLocationPermission,
+        userPosition,
+        placePosition,
+        followUserPosition,
+    ) {
+        //animates camera to new user position
+        if (hasLocationPermission && followUserPosition && !userPosition.isInit) {
+            animateCamera(userPosition.toLatLng())
+            //animates camera to new place position (used for moving camera when map loaded and when
+            //user cancels editing of place to return previous position
+        } else if (!shouldReceivePositionUpdates && !placePosition.isInit) {
+            animateCamera(placePosition.toLatLng())
         }
     }
 
     //Effect that sets new place position when camera moving by user is ended end
     //disables position tracking when camera moving started by user
-    LaunchedEffect(cameraPositionState.isMoving) {
+    LaunchedEffect(cameraPositionState.isMoving, shouldReceivePositionUpdates) {
         if (cameraPositionState.cameraMoveStartedReason == CameraMoveStartedReason.GESTURE
             && cameraPositionState.isMoving
         ) {
             followUserPosition = false
         } else if (!cameraPositionState.isMoving) {
-            if (isPlaceEditing) with(cameraPositionState.position) {
+            if (shouldReceivePositionUpdates) with(cameraPositionState.position) {
                 onPlacePositionUpdated(target.toPosition())
                 zoom = this.zoom
             }
         }
     }
 
-    if (hasLocationPermission && isPlaceEditing) {
+    if (hasLocationPermission && shouldReceivePositionUpdates) {
         PositionEffect(
             usePreciseLocation = usePreciseLocation,
             onGpsUnavailableResolvable = onGpsUnavailableResolvable,
@@ -118,29 +145,24 @@ fun KolumbusMap(
             cameraPositionState = cameraPositionState,
             properties = MapProperties(
                 minZoomPreference = 10f,
-                isMyLocationEnabled = hasLocationPermission && isPlaceEditing
+                isMyLocationEnabled = hasLocationPermission && shouldReceivePositionUpdates
             ),
             uiSettings = MapUiSettings(
                 zoomControlsEnabled = false,
-                scrollGesturesEnabled = isPlaceEditing,
+                scrollGesturesEnabled = shouldReceivePositionUpdates,
                 myLocationButtonEnabled = false
             ),
             mapColorScheme = ComposeMapColorScheme.FOLLOW_SYSTEM,
-            onMapLoaded = {
-                if (placePosition != Position.initialPosition()) cameraPositionState.move(
-                    CameraUpdateFactory.newCameraPosition(
-                        CameraPosition.fromLatLngZoom(
-                            placePosition.toLatLng(),
-                            16f
-                        )
-                    )
-                )
-            },
 
             modifier = Modifier.matchParentSize()
-        )
+        ) {
+            if (!shouldReceivePositionUpdates && !placePosition.isInit) {
+                val placeMarker = rememberMarkerState(position = placePosition.toLatLng())
+                Marker(state = placeMarker)
+            }
+        }
         AnimatedVisibility(
-            isPlaceEditing,
+            visible = shouldReceivePositionUpdates,
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(bottom = 8.dp, end = 8.dp),
@@ -149,7 +171,8 @@ fun KolumbusMap(
         ) {
             FollowPositionButton(
                 followingUserPosition = followUserPosition,
-                hasLocationPermission = hasLocationPermission
+                hasLocationPermission = hasLocationPermission,
+                showNoLocationPermissionsRationale = { TODO() }
             ) { followUserPosition = it }
         }
     }
@@ -246,18 +269,25 @@ private fun FollowPositionButton(
     modifier: Modifier = Modifier,
     followingUserPosition: Boolean,
     hasLocationPermission: Boolean,
+    showNoLocationPermissionsRationale: () -> Unit,
     onFollowChanged: (Boolean) -> Unit
 ) {
     FilledTonalIconToggleButton(
         modifier = modifier,
         checked = followingUserPosition,
-        onCheckedChange = onFollowChanged,
-        enabled = hasLocationPermission
+        onCheckedChange = { checked ->
+            if (hasLocationPermission) {
+                onFollowChanged(checked)
+            } else {
+                showNoLocationPermissionsRationale()
+            }
+        },
     ) {
         AnimatedContent(hasLocationPermission, label = "TrackPositionBtn") { hasPermissions ->
             if (hasPermissions) Icon(
                 painter = painterResource(R.drawable.baseline_my_location_24),
-                contentDescription = stringResource(R.string.follow_my_position_cd)
+                contentDescription = stringResource(R.string.follow_my_position_cd),
+                tint = if (followingUserPosition) MaterialTheme.colorScheme.primary else LocalContentColor.current
             ) else Icon(
                 painter = painterResource(R.drawable.baseline_location_disabled_24),
                 contentDescription = stringResource(R.string.track_location_unavailable)

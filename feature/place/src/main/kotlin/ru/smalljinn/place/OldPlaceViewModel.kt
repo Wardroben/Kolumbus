@@ -1,23 +1,6 @@
 package ru.smalljinn.place
 
-import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
-import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
-import ru.smalljinn.model.data.Place
-import ru.smalljinn.model.data.response.PlaceError
-import ru.smalljinn.model.data.response.Result
-import ru.smalljinn.place.navigation.PlaceRoute
-import javax.inject.Inject
-
+/*
 @HiltViewModel
 class OldPlaceViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
@@ -26,7 +9,8 @@ class OldPlaceViewModel @Inject constructor(
     private val placeId = savedStateHandle.toRoute<PlaceRoute>().id
     private val isEditing = MutableStateFlow(placeId == null)
 
-    /*val placeState: StateFlow<PlaceUiState> = combine(
+    */
+/*val placeState: StateFlow<PlaceUiState> = combine(
         placesRepository.getPlace(placeId),
         isEditing,
         ::Pair
@@ -43,7 +27,8 @@ class OldPlaceViewModel @Inject constructor(
             viewModelScope,
             SharingStarted.WhileSubscribed(5_000L),
             PlaceUiState.Loading
-        )*/
+        )*//*
+
 
     internal fun obtainEvent(event: PlaceEvent) {
         when (event) {
@@ -88,4 +73,4 @@ sealed interface PlaceUiState {
     data class Success(val place: Place, val isEditing: Boolean) : PlaceUiState
     data object Loading : PlaceUiState
     data object Error : PlaceUiState
-}
+}*/

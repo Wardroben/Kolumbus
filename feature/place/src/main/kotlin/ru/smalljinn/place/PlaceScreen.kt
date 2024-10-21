@@ -73,6 +73,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Position
 import ru.smalljinn.permissions.CameraPermissionTextProvider
+import ru.smalljinn.permissions.LocationPermissionTextProvider
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.ui.CreationDate
 import ru.smalljinn.ui.KolumbusMap
@@ -93,9 +94,6 @@ fun PlaceScreen(
 ) {
     val context = LocalContext.current
 
-    /*val placeUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val isEditing by viewModel.isEditing.collectAsStateWithLifecycle()
-    val isDataProcessing by viewModel.isDataProcessing.collectAsStateWithLifecycle()*/
     val placeUiState by viewModel.uiState1.collectAsStateWithLifecycle()
     val permissionState by viewModel.permissionState.collectAsStateWithLifecycle()
 
@@ -118,9 +116,41 @@ fun PlaceScreen(
         }
     }
 
+    var showDialogForLocationPermission by rememberSaveable { mutableStateOf(false) }
+    var userDeniedLocationPermissionNow by rememberSaveable { mutableStateOf(false) }
+    val openSettings = {
+        context.startActivity(viewModel.getSettingsIntent())
+        showDialogForLocationPermission = false
+    }
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permission: Map<String, Boolean> ->
+        if (!userDeniedLocationPermissionNow
+            && permission.all { perm -> !perm.value }
+        ) showDialogForLocationPermission = true
+        else viewModel.updatePermissions()
+    }
+    if (showDialogForLocationPermission && placeUiState.placeMode != PlaceMode.VIEW) {
+        PermissionExplanationDialog(
+            onOpenSettings = openSettings,
+            onDismiss = {
+                showDialogForLocationPermission = false
+                userDeniedLocationPermissionNow = true
+            },
+            textProvider = LocationPermissionTextProvider(),
+            isPermanentlyDeclined = !ActivityCompat.shouldShowRequestPermissionRationale(
+                context as Activity,
+                PermissionManager.locationPermissions.first()
+            ),
+            onConfirm = {
+                showDialogForLocationPermission = false
+                locationPermissionLauncher.launch(PermissionManager.locationPermissions)
+            }
+        )
+    }
+
     PlaceScreen(
         showBackButton = showBackButton,
-        isEditing = placeUiState.placeMode != PlaceMode.VIEW,
         isDataProcessing = placeUiState.isDataProcessing,
         onBackClick = onBackClick,
         placeUiState = placeUiState,
@@ -135,7 +165,7 @@ fun PlaceScreen(
         onCancelEditing = viewModel::cancelChanges,
         onDescriptionChanged = viewModel::setDescription,
         onTitleChanged = viewModel::setTitle,
-        onOpenSettings = { context.startActivity(viewModel.getSettingsIntent()) },
+        onOpenSettings = openSettings,
         onPhotoTaken = viewModel::addImage,
         permissionState = permissionState,
         onImagesTaken = viewModel::addImages,
@@ -145,7 +175,10 @@ fun PlaceScreen(
         onGpsUnavailableResolvable = { intentRequest ->
             gpsSettingsLauncher.launch(intentRequest)
         },
-        onShareClick = {TODO("Share action")},
+        onShareClick = { TODO("Share action") },
+        onRequestLocationPermission = {
+            if (!userDeniedLocationPermissionNow) showDialogForLocationPermission = true
+        },
         isGpsRequestDenied = gpsRequestDenied
     )
 }
@@ -155,7 +188,6 @@ fun PlaceScreen(
 internal fun PlaceScreen(
     placeUiState: PlaceDetailState,
     permissionState: PermissionManager.State,
-    isEditing: Boolean,
     showBackButton: Boolean,
     onBackClick: () -> Unit,
     onDeleteClick: () -> Unit,
@@ -175,6 +207,7 @@ internal fun PlaceScreen(
     onUserPositionUpdated: (Position) -> Unit,
     onPlacePositionUpdated: (Position) -> Unit,
     isGpsRequestDenied: Boolean,
+    onRequestLocationPermission: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val placeLazyListState = rememberLazyListState()
@@ -194,7 +227,7 @@ internal fun PlaceScreen(
             else -> {
                 stickyHeader {
                     PlaceToolbar(
-                        isEditing = isEditing,
+                        isEditing = placeUiState.placeMode != PlaceMode.VIEW,
                         showBackButton = showBackButton,
                         onBackClick = onBackClick,
                         onDeleteClick = onDeleteClick,
@@ -208,9 +241,9 @@ internal fun PlaceScreen(
                         }
                     )
                 }
+                if (!permissionState.hasAtLeastOneLocationAccess) onRequestLocationPermission()
                 placeDetailBody(
                     placeDetailState = placeUiState,
-                    isEditing = isEditing,
                     onRemoveImage = onRemoveImage,
                     onDescriptionChanged = onDescriptionChanged,
                     onTitleChanged = onTitleChanged,
@@ -431,7 +464,6 @@ private fun TakeMediaImagesButton(
 @OptIn(ExperimentalComposeUiApi::class)
 private fun LazyListScope.placeDetailBody(
     placeDetailState: PlaceDetailState,
-    isEditing: Boolean,
     onDescriptionChanged: (String) -> Unit,
     onTitleChanged: (String) -> Unit,
     onRemoveImage: (Image) -> Unit,
@@ -450,7 +482,7 @@ private fun LazyListScope.placeDetailBody(
         //images lazy row
         PlaceImagesRow(
             images = placeDetailState.images,
-            isEditing = isEditing,
+            isEditing = placeDetailState.placeMode != PlaceMode.VIEW,
             onRemoveImage = onRemoveImage,
             onOpenSettings = onOpenSettings,
             onPhotoTaken = onPhotoTaken,
@@ -466,7 +498,7 @@ private fun LazyListScope.placeDetailBody(
                 .height(180.dp)
                 .padding(horizontal = 16.dp)
                 .motionEventSpy {
-                    if (isEditing) {
+                    if (placeDetailState.placeMode != PlaceMode.VIEW) {
                         when (it.action) {
                             MotionEvent.ACTION_DOWN -> onMapCameraMoving(true)
                             MotionEvent.ACTION_UP -> onMapCameraMoving(false)
@@ -474,27 +506,27 @@ private fun LazyListScope.placeDetailBody(
                     }
                 },
             //TODO if placePosition null and userPosition null
-            placePosition = placeDetailState.placePosition ?: Position(53.7222971, 91.4157491),
+            placePosition = placeDetailState.placePosition ?: Position.initialPosition(),
             userPosition = placeDetailState.userPosition ?: Position.initialPosition(),
             onUserPositionUpdated = onUserPositionUpdated,
             onPlacePositionUpdated = onPlacePositionUpdated,
             onGpsUnavailableResolvable = onGpsUnavailableResolvable,
             hasLocationPermission = permissionState.hasAtLeastOneLocationAccess,
             usePreciseLocation = permissionState.hasFineLocationAccess,
-            isPlaceEditing = isEditing,
-            isPlaceCreating = placeDetailState.placeMode == PlaceMode.CREATING,
-            isGpsRequestDenied = isGpsRequestDenied
+            shouldReceivePositionUpdates = placeDetailState.placeMode != PlaceMode.VIEW,
+            isGpsRequestDenied = isGpsRequestDenied,
+            followUserPositionAtStart = placeDetailState.placeMode == PlaceMode.CREATING
         )
     }
     item {
         //title
         TransparentTextField(
             text = placeDetailState.title,
-            readOnly = !isEditing,
+            readOnly = placeDetailState.placeMode == PlaceMode.VIEW,
             onTextChanged = onTitleChanged,
             style = MaterialTheme.typography.titleLarge,
             hintText = stringResource(R.string.title_cd),
-            shouldShowHint = isEditing && placeDetailState.title.isBlank(),
+            shouldShowHint = placeDetailState.placeMode != PlaceMode.VIEW && placeDetailState.title.isBlank(),
             imeAction = ImeAction.Next,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
@@ -510,19 +542,19 @@ private fun LazyListScope.placeDetailBody(
     item {
         //Description
         AnimatedVisibility(
-            isEditing || placeDetailState.description.isNotBlank(),
+            placeDetailState.placeMode != PlaceMode.VIEW || placeDetailState.description.isNotBlank(),
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
             TransparentTextField(
                 text = placeDetailState.description,
-                readOnly = !isEditing,
+                readOnly = placeDetailState.placeMode == PlaceMode.VIEW,
                 onTextChanged = onDescriptionChanged,
                 style = MaterialTheme.typography.bodyLarge,
                 hintText = stringResource(R.string.description_cd),
-                shouldShowHint = isEditing && placeDetailState.description.isBlank(),
+                shouldShowHint = placeDetailState.placeMode != PlaceMode.VIEW && placeDetailState.description.isBlank(),
                 modifier = Modifier
-                    .heightIn(100.dp, max = if (!isEditing) Int.MAX_VALUE.dp else 300.dp)
+                    .heightIn(100.dp, max = if (placeDetailState.placeMode == PlaceMode.VIEW) Int.MAX_VALUE.dp else 300.dp)
                     .padding(horizontal = 16.dp)
             )
         }
