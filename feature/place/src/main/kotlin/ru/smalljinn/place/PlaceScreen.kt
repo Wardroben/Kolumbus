@@ -42,11 +42,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -175,6 +178,7 @@ fun PlaceScreen(
         onRequestLocationPermission = {
             if (!permissionState.hasAtLeastOneLocationAccess) showDialogForLocationPermission = true
         },
+        onSetHeaderImage = viewModel::setHeaderImage,
         isGpsRequestDenied = gpsRequestDenied
     )
 }
@@ -204,6 +208,7 @@ internal fun PlaceScreen(
     onPlacePositionUpdated: (Position) -> Unit,
     isGpsRequestDenied: Boolean,
     onRequestLocationPermission: () -> Unit,
+    onSetHeaderImage: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val placeLazyListState = rememberLazyListState()
@@ -254,7 +259,8 @@ internal fun PlaceScreen(
                         columnScrollingEnabled = !isMapCameraMoving
                     },
                     isGpsRequestDenied = isGpsRequestDenied,
-                    onRequestLocationPermission = onRequestLocationPermission
+                    onRequestLocationPermission = onRequestLocationPermission,
+                    onSetHeaderImage = onSetHeaderImage
                 )
                 item {
                     Spacer(
@@ -277,9 +283,12 @@ private fun PlaceImagesRow(
     isEditing: Boolean,
     onPhotoTaken: (Uri) -> Unit,
     onOpenSettings: () -> Unit,
+    headerImageId: Long?,
     hasCameraAccess: Boolean,
+    onSetHeaderImage: (Long) -> Unit,
     onImagesTaken: (List<Uri>) -> Unit,
     onRemoveImage: (Image) -> Unit,
+    showHeaderImageControls: Boolean,
     getUriForPhoto: () -> Uri
 ) {
     val lazyRowState = rememberLazyListState()
@@ -306,7 +315,7 @@ private fun PlaceImagesRow(
             state = lazyRowState
         ) {
             items(items = images, key = { it.url }, contentType = { "placeImage" }) { image ->
-                RemovablePlaceImages(
+                Box(
                     modifier = Modifier
                         .sizeIn(
                             minWidth = 135.dp,
@@ -315,10 +324,25 @@ private fun PlaceImagesRow(
                             maxHeight = 180.dp
                         )
                         .animateItem(),
-                    onRemoveClick = { onRemoveImage(image) },
-                    readyToDelete = isEditing,
-                    url = image.url
-                )
+                ) {
+                    RemovablePlaceImages(
+                        onRemoveClick = { onRemoveImage(image) },
+                        readyToDelete = isEditing,
+                        url = image.url
+                    )
+                    if (showHeaderImageControls) {
+                        IconButton(
+                            onClick = { if (headerImageId != image.id) onSetHeaderImage(image.id) },
+                            modifier = Modifier.padding(10.dp)
+                        ) {
+                            Icon(
+                                imageVector = if (headerImageId == image.id) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Set image as favorite",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
+                }
             }
         }
 
@@ -472,6 +496,7 @@ private fun LazyListScope.placeDetailBody(
     onGpsUnavailableResolvable: (IntentSenderRequest) -> Unit,
     getUriForPhoto: () -> Uri,
     isGpsRequestDenied: Boolean,
+    onSetHeaderImage: (Long) -> Unit,
     onRequestLocationPermission: () -> Unit,
     onMapCameraMoving: (Boolean) -> Unit
 ) {
@@ -485,7 +510,10 @@ private fun LazyListScope.placeDetailBody(
             onPhotoTaken = onPhotoTaken,
             hasCameraAccess = permissionState.hasCameraAccess,
             onImagesTaken = onImagesTaken,
-            getUriForPhoto = getUriForPhoto
+            getUriForPhoto = getUriForPhoto,
+            onSetHeaderImage = onSetHeaderImage,
+            headerImageId = placeDetailState.headerImageId,
+            showHeaderImageControls = placeDetailState.placeMode != PlaceMode.CREATING
         )
     }
     item {

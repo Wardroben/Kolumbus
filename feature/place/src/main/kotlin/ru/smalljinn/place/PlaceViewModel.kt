@@ -175,6 +175,19 @@ class PlaceViewModel @Inject constructor(
 
     fun getSettingsIntent() = permissionManager.createSettingsIntent()
 
+    fun setHeaderImage(id: Long) {
+        _uiState.update { it.copy(headerImageId = id) }
+        viewModelScope.launch {
+            savePlaceUseCase(
+                place = uiState1.value.getPlaceToInsert(
+                    initialPlace.id,
+                    initialPlace.favorite
+                ),
+                imagesToDelete = emptySet()
+            )
+        }
+    }
+
     private fun setDataProcessing(processing: Boolean) =
         _uiState.update { it.copy(isDataProcessing = processing) }
 
