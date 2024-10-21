@@ -270,8 +270,6 @@ internal fun PlaceScreen(
                     )
                 }
             }
-
-
         }
     }
 }
@@ -337,7 +335,11 @@ private fun PlaceImagesRow(
                             modifier = Modifier.padding(10.dp)
                         ) {
                             Icon(
-                                imageVector = if (headerImageId == image.id) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                imageVector = if (
+                                    headerImageId == image.id
+                                    || (headerImageId == null && images.first() == image)
+                                )
+                                    Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                                 contentDescription = "Set image as favorite",
                                 tint = MaterialTheme.colorScheme.error
                             )
