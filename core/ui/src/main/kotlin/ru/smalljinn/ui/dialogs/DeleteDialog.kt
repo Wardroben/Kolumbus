@@ -1,30 +1,30 @@
 package ru.smalljinn.ui.dialogs
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import ru.smalljinn.permissions.PermissionTextProvider
 import ru.smalljinn.ui.R
 
 @Composable
-fun PermissionExplanationDialog(
+fun DeleteDialog(
     modifier: Modifier = Modifier,
-    textProvider: PermissionTextProvider,
     onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-    isPermanentlyDeclined: Boolean,
-    onOpenSettings: () -> Unit
+    confirmDeletion: () -> Unit,
+    placeTitle: String
 ) {
     AlertDialog(
         modifier = modifier,
         onDismissRequest = onDismiss,
         confirmButton = {
-            Button(onClick = if (isPermanentlyDeclined) onOpenSettings else onConfirm) {
-                Text(if (isPermanentlyDeclined) stringResource(R.string.open_settings) else "OK")
+            Button(onClick = confirmDeletion) {
+                Text("Delete")
             }
         },
         dismissButton = {
@@ -32,7 +32,13 @@ fun PermissionExplanationDialog(
                 Text(stringResource(R.string.cancel))
             }
         },
-        title = { Text(stringResource(R.string.permission_required)) },
-        text = { Text(stringResource(textProvider.getDescriptionResId(isPermanentlyDeclined))) },
+        title = { Text(stringResource(R.string.delete_place_title)) },
+        text = { Text(stringResource(R.string.delete_place_text, placeTitle)) },
+        icon = {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = stringResource(R.string.delete_place_text, placeTitle)
+            )
+        }
     )
 }

@@ -24,12 +24,9 @@ import ru.smalljinn.model.data.Position
 import ru.smalljinn.model.data.response.PlaceError
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.place.navigation.PlaceRoute
-import ru.smalljinn.place.usecase.DeletePlaceUseCase
 import ru.smalljinn.place.usecase.InvalidPlaceException
 import ru.smalljinn.place.usecase.SavePlaceUseCase
 import javax.inject.Inject
-
-private const val TAG = "PlaceVM"
 
 @HiltViewModel
 class PlaceViewModel @Inject constructor(
@@ -39,7 +36,6 @@ class PlaceViewModel @Inject constructor(
     private val permissionManager: PermissionManager,
     private val photoManager: PhotoManager,
     private val savePlaceUseCase: SavePlaceUseCase,
-    private val deletePlaceUseCase: DeletePlaceUseCase
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<PlaceRoute>()
     private val initialMode = when {
@@ -87,6 +83,10 @@ class PlaceViewModel @Inject constructor(
 
     private val _deletedImages = mutableListOf<Image>()
 
+    fun getPlaceInfoToDelete(): Pair<Long, String> =
+        with(uiState1.value) { Pair(initialPlace.id, title) }
+
+
     fun removeImage(image: Image) {
         _uiState.update { it.copy(images = uiState1.value.images.minus(image)) }
         _deletedImages.add(image)
@@ -102,7 +102,6 @@ class PlaceViewModel @Inject constructor(
     fun addImages(uris: List<Uri>) {
         if (uris.isEmpty()) return
         val newImages = uris.map { uri -> Image(id = 0, url = uri.toString()) }
-        //_images.update { it.plus(newImages) }
 
         _uiState.update { it.copy(images = uiState1.value.images.plus(newImages)) }
     }
@@ -131,7 +130,8 @@ class PlaceViewModel @Inject constructor(
         setDataProcessing(true)
         viewModelScope.launch {
             try {
-                val placeToInsert = uiState1.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite)
+                val placeToInsert =
+                    uiState1.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite)
                 val insertPlaceResultId = savePlaceUseCase(
                     place = placeToInsert,
                     imagesToDelete = _deletedImages.toSet()
@@ -139,7 +139,14 @@ class PlaceViewModel @Inject constructor(
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
                 val newImages = imagesRepository.getPlaceImages(initialPlace.id)
-                initialPlace = initialPlace.copy(images = newImages, position = placeToInsert.position)
+                initialPlace =
+                    initialPlace.copy(
+                        images = newImages,
+                        position = placeToInsert.position,
+                        title = placeToInsert.title,
+                        description = placeToInsert.description,
+                        headerImageId = placeToInsert.headerImageId,
+                    )
                 _uiState.update { it.copy(images = newImages) }
             } catch (e: InvalidPlaceException) {
                 isCanceled = true
@@ -151,9 +158,6 @@ class PlaceViewModel @Inject constructor(
         if (!isCanceled) endEditing()
     }
 
-    private fun setDataProcessing(processing: Boolean) =
-        _uiState.update { it.copy(isDataProcessing = processing) }
-
     fun cancelChanges() {
         if (initialPlace.id == Place.CREATION_ID) {
             _eventChannel.trySend(PlaceUiEvent.NavigateBack)
@@ -163,29 +167,21 @@ class PlaceViewModel @Inject constructor(
         }
     }
 
-    fun deletePlace() {
-        if (initialPlace.id > 0L) viewModelScope.launch { deletePlaceUseCase(initialPlace.id) }
-    }
-
     fun getUriForPhoto(): Uri = photoManager.getUriForTakePhoto()
 
-    fun startEditing() {
-        _uiState.update { it.copy(placeMode = PlaceMode.EDITING) }
-    }
+    fun startEditing() = _uiState.update { it.copy(placeMode = PlaceMode.EDITING) }
+
+    fun updatePermissions() = viewModelScope.launch { permissionManager.checkPermissions() }
+
+    fun getSettingsIntent() = permissionManager.createSettingsIntent()
+
+    private fun setDataProcessing(processing: Boolean) =
+        _uiState.update { it.copy(isDataProcessing = processing) }
 
     private fun endEditing() {
         _deletedImages.clear()
         _uiState.update { it.copy(placeMode = PlaceMode.VIEW) }
     }
-
-    fun updatePermissions() = viewModelScope.launch { permissionManager.checkPermissions() }
-    fun getSettingsIntent() = permissionManager.createSettingsIntent()
-    /*
-     TODO make deletedImagesList which contains deleted images.
-       when pressed savePlace delete from repo images from deletedImagesList
-       and save images from _images list with id == 0
-       Maybe make saveImageUseCase
-     */
 
     private fun resetPlaceProperties() {
         with(initialPlace) {
@@ -193,12 +189,17 @@ class PlaceViewModel @Inject constructor(
                 it.copy(
                     placePosition = position,
                     creationDate = creationDate,
-                    images = images
+                    images = images,
+                    title = title,
+                    description = description
                 )
             }
         }
     }
 }
+
+private const val TAG = "PlaceVM"
+
 
 internal data class PlaceDetailState(
     val title: String = "",

@@ -44,6 +44,7 @@ import ru.smalljinn.place.navigation.navigateToPlace
 import ru.smalljinn.place.navigation.placeScreen
 import ru.smalljinn.places.PlacesRoute
 import ru.smalljinn.places.navigation.PlacesRoute
+import ru.smalljinn.ui.dialogs.DeleteDialog
 import java.util.UUID
 
 @Serializable
@@ -66,12 +67,15 @@ internal fun PlacesListDetailScreen(
     onShowMessage: (Int) -> Unit,
     viewModel: Places2PaneViewModel = hiltViewModel()
 ) {
-    val selectedPlaceId by viewModel.selectedPlaceId.collectAsStateWithLifecycle()
+    //val selectedPlaceId by viewModel.selectedPlaceId.collectAsStateWithLifecycle()
+    val state by viewModel.state.collectAsStateWithLifecycle()
     PlacesListDetailScreen(
         windowAdaptiveInfo = windowAdaptiveInfo,
-        selectedPlaceId = selectedPlaceId,
+        placesState = state,
         onPlaceClick = { viewModel.selectPlace(it) },
-        placeDeleted = { viewModel.unselectPlace() },
+        setPlaceToDelete = { id, title -> viewModel.setToDeletePlace(id, title) },
+        onDeleteDismiss = viewModel::clearPlaceToDelete,
+        onPlaceDeletionConfirmed = viewModel::deletePlace,
         onShowMessage = onShowMessage
     )
 }
@@ -80,8 +84,10 @@ internal fun PlacesListDetailScreen(
 @Composable
 fun PlacesListDetailScreen(
     onPlaceClick: (Long) -> Unit,
-    selectedPlaceId: Long?,
-    placeDeleted: () -> Unit,
+    placesState: Place2PaneState,
+    setPlaceToDelete: (placeId: Long, title: String) -> Unit,
+    onDeleteDismiss: () -> Unit,
+    onPlaceDeletionConfirmed: () -> Unit,
     onShowMessage: (Int) -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo
 ) {
@@ -90,7 +96,7 @@ fun PlacesListDetailScreen(
         initialDestinationHistory = listOfNotNull(
             ThreePaneScaffoldDestinationItem(ListDetailPaneScaffoldRole.List),
             ThreePaneScaffoldDestinationItem<Nothing>(ListDetailPaneScaffoldRole.Detail).takeIf {
-                selectedPlaceId != null
+                placesState.selectedPlaceId != null
             }
         )
     )
@@ -98,7 +104,7 @@ fun PlacesListDetailScreen(
     BackHandler(listDetailNavigator.canNavigateBack()) { listDetailNavigator.navigateBack() }
 
     var nestedNavHostStartRoute by remember {
-        val route = selectedPlaceId?.let { PlaceRoute(id = it) } ?: PlacePlaceholderRoute
+        val route = placesState.selectedPlaceId?.let { PlaceRoute(id = it) } ?: PlacePlaceholderRoute
         mutableStateOf(route)
     }
     var nestedNavKey by rememberSaveable(stateSaver = Saver({ it.toString() }, UUID::fromString)) {
@@ -119,8 +125,8 @@ fun PlacesListDetailScreen(
         listDetailNavigator.navigateTo(ListDetailPaneScaffoldRole.Detail)
     }
 
-    fun onPlaceDeleted() {
-        placeDeleted()
+    fun onPlaceDelete() {
+        onPlaceDeletionConfirmed()
         if (!listDetailNavigator.isDetailPaneVisible()) {
             listDetailNavigator.navigateBack()
         }
@@ -147,7 +153,7 @@ fun PlacesListDetailScreen(
                 ) { padding ->
                     PlacesRoute(
                         onPlaceClicked = ::onPlaceClickShowDetailPane,
-                        highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible() && selectedPlaceId != Place.CREATION_ID,
+                        highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible() && placesState.selectedPlaceId != Place.CREATION_ID,
                         modifier = Modifier.padding(padding)
                     )
                 }
@@ -164,7 +170,7 @@ fun PlacesListDetailScreen(
                         placeScreen(
                             onBackClick = listDetailNavigator::navigateBack,
                             showBackButton = !listDetailNavigator.isListPaneVisible(),
-                            onPlaceDeleted = { onPlaceDeleted() },
+                            onPlaceDelete = { id, title -> setPlaceToDelete(id,title) },
                             onShowMessage = onShowMessage
                         )
                         composable<PlacePlaceholderRoute> { PlaceDetailPlaceholder() }
@@ -172,6 +178,12 @@ fun PlacesListDetailScreen(
                 }
             }
         }
+    )
+
+    if (placesState.placeToDelete != null) DeleteDialog(
+        onDismiss = onDeleteDismiss,
+        confirmDeletion = { onPlaceDelete() },
+        placeTitle = placesState.placeToDelete.title
     )
 }
 

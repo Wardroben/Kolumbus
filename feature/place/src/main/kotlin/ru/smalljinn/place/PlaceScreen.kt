@@ -88,7 +88,7 @@ import ru.smalljinn.ui.dialogs.PermissionExplanationDialog
 fun PlaceScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
-    onPlaceDeleted: () -> Unit,
+    onPlaceDelete: (placeId: Long, title: String) -> Unit,
     onShowMessage: (Int) -> Unit,
     viewModel: PlaceViewModel = hiltViewModel()
 ) {
@@ -153,9 +153,8 @@ fun PlaceScreen(
         placeUiState = placeUiState,
         onRemoveImage = viewModel::removeImage,
         onDeleteClick = {
-            //TODO hoist delete logic to 2pane
-            onPlaceDeleted()
-            viewModel.deletePlace()
+            val info = viewModel.getPlaceInfoToDelete()
+            onPlaceDelete(info.first, info.second)
         },
         onEditClick = viewModel::startEditing,
         onSaveChanges = viewModel::saveChanges,
@@ -173,7 +172,9 @@ fun PlaceScreen(
             gpsSettingsLauncher.launch(intentRequest)
         },
         onShareClick = { TODO("Share action") },
-        onRequestLocationPermission = { showDialogForLocationPermission = true },
+        onRequestLocationPermission = {
+            if (!permissionState.hasAtLeastOneLocationAccess) showDialogForLocationPermission = true
+        },
         isGpsRequestDenied = gpsRequestDenied
     )
 }
@@ -551,7 +552,10 @@ private fun LazyListScope.placeDetailBody(
                 hintText = stringResource(R.string.description_cd),
                 shouldShowHint = placeDetailState.placeMode != PlaceMode.VIEW && placeDetailState.description.isBlank(),
                 modifier = Modifier
-                    .heightIn(100.dp, max = if (placeDetailState.placeMode == PlaceMode.VIEW) Int.MAX_VALUE.dp else 300.dp)
+                    .heightIn(
+                        100.dp,
+                        max = if (placeDetailState.placeMode == PlaceMode.VIEW) Int.MAX_VALUE.dp else 300.dp
+                    )
                     .padding(horizontal = 16.dp)
             )
         }

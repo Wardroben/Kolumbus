@@ -23,14 +23,14 @@ fun NavController.navigateToPlace(
 fun NavGraphBuilder.placeScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
-    onPlaceDeleted: () -> Unit,
+    onPlaceDelete: (placeId: Long, title: String) -> Unit,
     onShowMessage: (Int) -> Unit
 ) {
     composable<PlaceRoute> {
         PlaceScreen(
             showBackButton = showBackButton,
             onBackClick = onBackClick,
-            onPlaceDeleted = onPlaceDeleted,
+            onPlaceDelete = onPlaceDelete,
             onShowMessage = onShowMessage
         )
     }
