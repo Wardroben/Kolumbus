@@ -38,7 +38,7 @@ class PhotoFileProvider : FileProvider(R.xml.file_paths) {
             require(checkOrCreatePhotoDir(context))
             val timeMillis = Clock.System.now().toEpochMilliseconds()
             try {
-                val photoFile = File(context.filesDir, "$IMAGES_PATH_NAME/image_$timeMillis.img")
+                val photoFile = File(context.filesDir, "$IMAGES_PATH_NAME/image_$timeMillis.jpeg")
                 photoFile.createNewFile()
                 return photoFile
             } catch (e: IOException) {

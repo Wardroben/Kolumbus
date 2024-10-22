@@ -2,6 +2,7 @@ package ru.smalljinn.place
 
 import android.Manifest
 import android.app.Activity
+import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
@@ -191,7 +192,10 @@ fun PlaceScreen(
         onGpsUnavailableResolvable = { intentRequest ->
             gpsSettingsLauncher.launch(intentRequest)
         },
-        onShareClick = { TODO("Share action") },
+        onShareClick = {
+            val intent = viewModel.createShareIntent()
+            context.startActivity(Intent.createChooser(intent, "Share place"))
+        },
         onRequestLocationPermission = {
             if (!permissionState.hasAtLeastOneLocationAccess) showDialogForLocationPermission = true
         },

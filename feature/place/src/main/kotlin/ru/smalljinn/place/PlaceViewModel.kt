@@ -1,7 +1,9 @@
 package ru.smalljinn.place
 
+import android.content.Intent
 import android.net.Uri
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -164,6 +166,26 @@ class PlaceViewModel @Inject constructor(
         } else {
             resetPlaceProperties()
             endEditing()
+        }
+    }
+
+    //TODO move to intent manager or something
+    fun createShareIntent(): Intent {
+        with(uiState1.value) {
+            val imageUris: ArrayList<Uri> = ArrayList(images.map { it.url.toUri() })
+            val headerImageUri = images.find { it.id == headerImageId }?.url?.toUri() ?: imageUris.first()
+            val intentText = "$title\n" +
+                    "$description\n" +
+                    "https://google.com/maps/place/${placePosition?.latitude},${placePosition?.longitude}"
+            val shareIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                type = "image/*"
+                putExtra(Intent.EXTRA_TITLE, "Sharing place")
+                putExtra(Intent.EXTRA_TEXT, intentText)
+                putExtra(Intent.EXTRA_STREAM, headerImageUri)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
+            return shareIntent
         }
     }
 
