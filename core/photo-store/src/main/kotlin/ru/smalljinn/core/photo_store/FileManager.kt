@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.smalljinn.model.data.response.PhotoError
 import ru.smalljinn.model.data.response.Result
+import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
@@ -33,7 +34,7 @@ class FileManager @Inject constructor(
 
     suspend fun clearTempImages() {
         withContext(Dispatchers.IO) {
-            val cacheDirectory = context.cacheDir
+            val cacheDirectory = File(context.cacheDir, TEMPORARY_IMAGES_PATH_NAME)
             if (cacheDirectory.exists() && cacheDirectory.isDirectory) {
                 val files = cacheDirectory.listFiles()
                 if (files != null && files.isNotEmpty()) {

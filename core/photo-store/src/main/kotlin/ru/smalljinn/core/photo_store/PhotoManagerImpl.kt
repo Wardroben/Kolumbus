@@ -46,6 +46,7 @@ class PhotoManagerImpl @Inject constructor(
     }
 
     override suspend fun deletePhotoFromDevice(uri: Uri): Result<Unit, PhotoError> {
+        fileManager.clearTempImages()
         return fileManager.deleteImage(uri)
     }
 
