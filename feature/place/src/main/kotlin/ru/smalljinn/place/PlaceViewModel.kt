@@ -174,15 +174,15 @@ class PlaceViewModel @Inject constructor(
         with(uiState1.value) {
             val imageUris: ArrayList<Uri> = ArrayList(images.map { it.url.toUri() })
             val headerImageUri = images.find { it.id == headerImageId }?.url?.toUri() ?: imageUris.first()
-            val intentText = "$title\n" +
-                    "$description\n" +
-                    "https://google.com/maps/place/${placePosition?.latitude},${placePosition?.longitude}"
+            val intentText = "$title\n\n" +
+                    "$description\n\n" +
+                    "https://www.google.com/maps/place/${placePosition?.latitude},${placePosition?.longitude}"
             val shareIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
-                type = "image/*"
                 putExtra(Intent.EXTRA_TITLE, "Sharing place")
                 putExtra(Intent.EXTRA_TEXT, intentText)
                 putExtra(Intent.EXTRA_STREAM, headerImageUri)
+                setDataAndType(headerImageUri, "image/*")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             return shareIntent

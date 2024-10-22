@@ -194,7 +194,7 @@ fun PlaceScreen(
         },
         onShareClick = {
             val intent = viewModel.createShareIntent()
-            context.startActivity(Intent.createChooser(intent, "Share place"))
+            context.startActivity(Intent.createChooser(intent, null))
         },
         onRequestLocationPermission = {
             if (!permissionState.hasAtLeastOneLocationAccess) showDialogForLocationPermission = true
