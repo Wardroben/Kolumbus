@@ -160,7 +160,6 @@ fun KolumbusMap(
                 myLocationButtonEnabled = false
             ),
             mapColorScheme = ComposeMapColorScheme.FOLLOW_SYSTEM,
-
             modifier = Modifier.matchParentSize()
         ) {
             if (shouldShowPlaceMarker && !placePosition.isInit) {
@@ -222,9 +221,7 @@ fun PositionEffect(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
 
-                    locationClient.lastLocation.addOnSuccessListener {
-                        currentOnGetPosition(it.toPosition())
-                    }
+
 
                     val priority = if (usePreciseLocation) {
                         Priority.PRIORITY_HIGH_ACCURACY
@@ -242,6 +239,9 @@ fun PositionEffect(
                     val settingsTask = settingsClient.checkLocationSettings(settingsRequest)
 
                     settingsTask.addOnSuccessListener {
+                        locationClient.lastLocation.addOnSuccessListener {
+                            currentOnGetPosition(it.toPosition())
+                        }
                         locationClient.requestLocationUpdates(
                             locationRequest,
                             locationCallback,
