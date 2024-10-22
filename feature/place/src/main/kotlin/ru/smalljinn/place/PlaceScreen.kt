@@ -5,6 +5,7 @@ import android.app.Activity
 import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.PickVisualMediaRequest
@@ -85,6 +86,7 @@ import ru.smalljinn.ui.ObserveAsEvents
 import ru.smalljinn.ui.RemovablePlaceImages
 import ru.smalljinn.ui.TakeMediaButton
 import ru.smalljinn.ui.TransparentTextField
+import ru.smalljinn.ui.dialogs.BackConfirmationDialog
 import ru.smalljinn.ui.dialogs.PermissionExplanationDialog
 
 @Composable
@@ -120,11 +122,13 @@ fun PlaceScreen(
     }
 
     var showDialogForLocationPermission by rememberSaveable { mutableStateOf(false) }
+
     val openSettings = {
         context.startActivity(viewModel.getSettingsIntent())
         viewModel.updatePermissions()
         showDialogForLocationPermission = false
     }
+
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permission: Map<String, Boolean> ->
@@ -149,6 +153,19 @@ fun PlaceScreen(
         )
     }
 
+    var showBackConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    if (showBackConfirmationDialog) {
+        BackConfirmationDialog(
+            onDismiss = { showBackConfirmationDialog = false },
+            onConfirm = {
+                viewModel.cancelChanges()
+                showBackConfirmationDialog = false
+            }
+        )
+    }
+    BackHandler(enabled = placeUiState.placeMode != PlaceMode.VIEW) {
+        showBackConfirmationDialog = true
+    }
     PlaceScreen(
         showBackButton = showBackButton,
         isDataProcessing = placeUiState.isDataProcessing,

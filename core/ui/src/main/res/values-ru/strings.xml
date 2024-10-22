@@ -8,4 +8,8 @@
     <string name="track_location_unavailable">Следование местоположению недоступно</string>
     <string name="delete_place_text">Вы действительно хотите удалить место: %1$s</string>
     <string name="delete_place_title">Подтверждение удаления</string>
+    <string name="cancel_editing_action">Отменить</string>
+    <string name="stay_here_action">Остаться</string>
+    <string name="cancel_editing_title">Отмена изменений</string>
+    <string name="cancel_editing_text">Все несохранённые данные будут утеряны. Отменить изменения?</string>
 </resources>
