@@ -45,4 +45,9 @@ interface PlaceDao {
         SELECT * FROM places
     """)
     fun getPlacesWithImagesStream(): Flow<List<PlaceWithImages>>
+
+    @Query("""
+        UPDATE places SET favorite = :favorite WHERE id LIKE :placeId 
+    """)
+    suspend fun makeFavoritePlace(placeId: Long, favorite: Boolean)
 }

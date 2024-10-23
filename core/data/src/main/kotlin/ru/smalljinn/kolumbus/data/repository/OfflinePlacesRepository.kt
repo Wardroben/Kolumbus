@@ -12,7 +12,6 @@ import javax.inject.Inject
 
 class OfflinePlacesRepository @Inject constructor(
     private val placeDao: PlaceDao,
-    //private val imageDao: ImageDao,
     private val imagesRepository: OfflineImagesRepository
 ) : PlacesRepository {
     override fun getPlacesStream(): Flow<List<Place>> {
@@ -20,12 +19,7 @@ class OfflinePlacesRepository @Inject constructor(
     }
 
     override suspend fun getPlace(placeId: Long): Place {
-        //if (placeId == null) return Place.getInitPlace()
         return placeDao.getPlaceById(placeId).asModel()
-            /*.map { placeWithImages ->
-            val place = placeWithImages.asModel()
-            place
-        }*/
     }
 
     override suspend fun upsertPlace(place: Place): Long {
@@ -43,5 +37,9 @@ class OfflinePlacesRepository @Inject constructor(
 
     override suspend fun deletePlaceById(placeId: Long) {
         return placeDao.deletePlaceById(placeId)
+    }
+
+    override suspend fun makePlaceFavorite(placeId: Long, favorite: Boolean) {
+        return placeDao.makeFavoritePlace(placeId, favorite)
     }
 }

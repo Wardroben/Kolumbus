@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.ui.EmptyPlacesContent
 import ru.smalljinn.ui.LoadingContent
+import ru.smalljinn.ui.PlacesTabContent
 import ru.smalljinn.ui.PlacesUiState
 
 
@@ -81,7 +82,9 @@ fun PlacesScreen(
                     onSearchClicked = onSearchClicked
                 )
                 PlacesTabContent(
-                    successUiState = uiState,
+                    places = uiState.places,
+                    selectedPlaceId = uiState.selectedPlaceId,
+                    useCompactMode = uiState.useCompactMode,
                     onPlaceClicked = onPlaceClick,
                     favoritePlace = favoritePlace,
                     highlightSelectedPlace = highlightSelectedPlace

@@ -1,5 +1,9 @@
 package ru.smalljinn.ui
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.ui.Modifier
@@ -38,5 +42,32 @@ fun LazyStaggeredGridScope.placesFeed(
                 )
             }
         }
+    }
+}
+
+fun LazyStaggeredGridScope.placesFeed(
+    places: List<Place>,
+    onPlaceClicked: (Long) -> Unit,
+    selectedPlaceId: Long?,
+    favoritePlace: (Place, Boolean) -> Unit,
+    highlightSelectedPlace: Boolean,
+    useCompactMode: Boolean
+) {
+    items(items = places, key = { it.id }) { place ->
+        PlaceCard(
+            onClick = { onPlaceClicked(place.id) },
+            onFavorite = { favoritePlace(place, !place.favorite) },
+            place = place,
+            isSelected = highlightSelectedPlace && selectedPlaceId == place.id,
+            compactStyle = useCompactMode,
+            modifier = Modifier.animateItem()
+        )
+    }
+    item {
+        Spacer(
+            Modifier.windowInsetsBottomHeight(
+                WindowInsets.systemBars
+            )
+        )
     }
 }

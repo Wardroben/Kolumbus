@@ -9,4 +9,5 @@ interface PlacesRepository {
     suspend fun upsertPlace(place: Place): Long
     suspend fun deletePlace(place: Place)
     suspend fun deletePlaceById(placeId: Long)
+    suspend fun makePlaceFavorite(placeId: Long, favorite: Boolean)
 }

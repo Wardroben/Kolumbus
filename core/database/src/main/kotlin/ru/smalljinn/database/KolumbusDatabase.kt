@@ -5,6 +5,7 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import ru.smalljinn.database.dao.ImageDao
 import ru.smalljinn.database.dao.PlaceDao
+import ru.smalljinn.database.dao.SearchPlaceDao
 import ru.smalljinn.database.model.ImageEntity
 import ru.smalljinn.database.model.PlaceEntity
 import ru.smalljinn.database.util.InstantConverter
@@ -26,4 +27,5 @@ import ru.smalljinn.database.util.UriConverter
 internal abstract class KolumbusDatabase: RoomDatabase() {
     abstract fun placeDao(): PlaceDao
     abstract fun imageDao(): ImageDao
+    abstract fun searchPlacesDao(): SearchPlaceDao
 }
