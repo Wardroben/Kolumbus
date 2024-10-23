@@ -23,7 +23,6 @@ dependencyResolutionManagement {
 rootProject.name = "Kolumbus"
 include(":app")
 include(":feature:places")
-include(":feature:edit")
 include(":feature:settings")
 include(":core:database")
 include(":core:model")

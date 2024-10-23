@@ -34,7 +34,6 @@
             <option value="$PROJECT_DIR$/core/photo-store" />
             <option value="$PROJECT_DIR$/core/ui" />
             <option value="$PROJECT_DIR$/feature" />
-            <option value="$PROJECT_DIR$/feature/edit" />
             <option value="$PROJECT_DIR$/feature/place" />
             <option value="$PROJECT_DIR$/feature/places" />
             <option value="$PROJECT_DIR$/feature/settings" />
