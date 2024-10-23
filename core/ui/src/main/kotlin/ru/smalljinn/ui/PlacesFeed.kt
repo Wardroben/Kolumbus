@@ -7,7 +7,12 @@ import ru.smalljinn.model.data.Place
 
 sealed interface PlacesUiState {
     data object Loading : PlacesUiState
-    data class Success(val selectedPlaceId: Long?, val places: List<Place>) : PlacesUiState
+    data class Success(
+        val selectedPlaceId: Long?,
+        val places: List<Place>,
+        val useCompactMode: Boolean
+    ) : PlacesUiState
+
     data object Empty : PlacesUiState
 }
 
@@ -28,6 +33,7 @@ fun LazyStaggeredGridScope.placesFeed(
                     place = place,
                     onClick = { onPlaceClicked(place.id) },
                     onFavorite = { onPlaceFavoriteChanged(place, !place.favorite) },
+                    compactStyle = placesState.useCompactMode,
                     modifier = Modifier.animateItem()
                 )
             }

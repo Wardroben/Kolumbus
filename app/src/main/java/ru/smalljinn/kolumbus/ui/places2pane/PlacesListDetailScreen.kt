@@ -44,6 +44,7 @@ import ru.smalljinn.place.navigation.navigateToPlace
 import ru.smalljinn.place.navigation.placeScreen
 import ru.smalljinn.places.PlacesRoute
 import ru.smalljinn.places.navigation.PlacesRoute
+import ru.smalljinn.settings.SettingsDialog
 import ru.smalljinn.ui.dialogs.DeleteDialog
 import java.util.UUID
 
@@ -55,9 +56,15 @@ internal object PlacePlaceholderRoute
 @Serializable
 internal object DetailPaneNavHostRoute
 
-fun NavGraphBuilder.placesListDetailScreen(onShowMessage: (Int) -> Unit) {
+fun NavGraphBuilder.placesListDetailScreen(
+    onShowMessage: (Int) -> Unit,
+    onSearchClicked: () -> Unit,
+) {
     composable<PlacesRoute> {
-        PlacesListDetailScreen(onShowMessage = onShowMessage)
+        PlacesListDetailScreen(
+            onShowMessage = onShowMessage,
+            onSearchClicked = onSearchClicked
+        )
     }
 }
 
@@ -65,10 +72,13 @@ fun NavGraphBuilder.placesListDetailScreen(onShowMessage: (Int) -> Unit) {
 internal fun PlacesListDetailScreen(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
     onShowMessage: (Int) -> Unit,
+    onSearchClicked: () -> Unit,
     viewModel: Places2PaneViewModel = hiltViewModel()
 ) {
-    //val selectedPlaceId by viewModel.selectedPlaceId.collectAsStateWithLifecycle()
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
+    if (showSettingsDialog) SettingsDialog(onDismiss = { showSettingsDialog = false })
     PlacesListDetailScreen(
         windowAdaptiveInfo = windowAdaptiveInfo,
         placesState = state,
@@ -76,6 +86,8 @@ internal fun PlacesListDetailScreen(
         setPlaceToDelete = { id, title -> viewModel.setToDeletePlace(id, title) },
         onDeleteDismiss = viewModel::clearPlaceToDelete,
         onPlaceDeletionConfirmed = viewModel::deletePlace,
+        onSearchClicked = onSearchClicked,
+        onSettingsClicked = { showSettingsDialog = true },
         onShowMessage = onShowMessage
     )
 }
@@ -89,6 +101,8 @@ fun PlacesListDetailScreen(
     onDeleteDismiss: () -> Unit,
     onPlaceDeletionConfirmed: () -> Unit,
     onShowMessage: (Int) -> Unit,
+    onSearchClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo
 ) {
     val listDetailNavigator = rememberListDetailPaneScaffoldNavigator(
@@ -104,7 +118,8 @@ fun PlacesListDetailScreen(
     BackHandler(listDetailNavigator.canNavigateBack()) { listDetailNavigator.navigateBack() }
 
     var nestedNavHostStartRoute by remember {
-        val route = placesState.selectedPlaceId?.let { PlaceRoute(id = it) } ?: PlacePlaceholderRoute
+        val route =
+            placesState.selectedPlaceId?.let { PlaceRoute(id = it) } ?: PlacePlaceholderRoute
         mutableStateOf(route)
     }
     var nestedNavKey by rememberSaveable(stateSaver = Saver({ it.toString() }, UUID::fromString)) {
@@ -154,7 +169,9 @@ fun PlacesListDetailScreen(
                     PlacesRoute(
                         onPlaceClicked = ::onPlaceClickShowDetailPane,
                         highlightSelectedPlace = listDetailNavigator.isDetailPaneVisible() && placesState.selectedPlaceId != Place.CREATION_ID,
-                        modifier = Modifier.padding(padding)
+                        modifier = Modifier.padding(padding),
+                        onSettingsClicked = onSettingsClicked,
+                        onSearchClicked = onSearchClicked,
                     )
                 }
             }
@@ -170,7 +187,7 @@ fun PlacesListDetailScreen(
                         placeScreen(
                             onBackClick = listDetailNavigator::navigateBack,
                             showBackButton = !listDetailNavigator.isListPaneVisible(),
-                            onPlaceDelete = { id, title -> setPlaceToDelete(id,title) },
+                            onPlaceDelete = { id, title -> setPlaceToDelete(id, title) },
                             onShowMessage = onShowMessage
                         )
                         composable<PlacePlaceholderRoute> { PlaceDetailPlaceholder() }

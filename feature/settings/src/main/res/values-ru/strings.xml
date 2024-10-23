@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings_loading">Настройки загружаются…</string>
+    <string name="settings_title">Настройки</string>
+    <string name="place_card_style_setting">Стиль карточки места</string>
+    <string name="full_placecard_style">Полный</string>
+    <string name="compact_placecard_style">Компактный</string>
+</resources>

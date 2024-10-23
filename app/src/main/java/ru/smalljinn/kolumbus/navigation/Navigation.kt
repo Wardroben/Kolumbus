@@ -12,7 +12,7 @@ import ru.smalljinn.settings.navigation.settingsScreen
 fun KolumbusNavHost(appState: KolumbusAppState, onShowMessage: (Int) -> Unit, modifier: Modifier = Modifier) {
     val navController = appState.navController
     NavHost(navController = navController, startDestination = PlacesRoute(), modifier = modifier) {
-        placesListDetailScreen(onShowMessage)
+        placesListDetailScreen(onShowMessage = onShowMessage, onSearchClicked = {})
         settingsScreen()
     }
 }

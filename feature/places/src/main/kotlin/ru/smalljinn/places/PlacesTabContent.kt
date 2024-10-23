@@ -14,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.ui.PlaceCard
+import ru.smalljinn.ui.PlacesUiState
 
 @Composable
 fun PlacesTabContent(
-    places: List<Place>,
+    successUiState: PlacesUiState.Success,
     onPlaceClicked: (Long) -> Unit,
     highlightSelectedPlace: Boolean,
-    selectedPlaceId: Long? = null,
     favoritePlace: (Place, Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -31,12 +31,13 @@ fun PlacesTabContent(
         verticalItemSpacing = 16.dp,
         modifier = modifier,
     ) {
-        items(items = places, key = { it.id }) { place ->
+        items(items = successUiState.places, key = { it.id }) { place ->
             PlaceCard(
                 onClick = { onPlaceClicked(place.id) },
                 onFavorite = { favoritePlace(place, !place.favorite) },
                 place = place,
-                isSelected = highlightSelectedPlace && selectedPlaceId == place.id,
+                isSelected = highlightSelectedPlace && successUiState.selectedPlaceId == place.id,
+                compactStyle = successUiState.useCompactMode,
                 modifier = Modifier.animateItem()
             )
         }

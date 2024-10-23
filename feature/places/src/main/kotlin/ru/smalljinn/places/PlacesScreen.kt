@@ -1,11 +1,23 @@
 package ru.smalljinn.places
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import ru.smalljinn.model.data.Place
@@ -19,6 +31,8 @@ fun PlacesRoute(
     modifier: Modifier = Modifier,
     onPlaceClicked: (Long) -> Unit,
     highlightSelectedPlace: Boolean = false,
+    onSearchClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
     viewmodel: PlacesViewModel = hiltViewModel()
 ) {
     val placesState by viewmodel.placesState.collectAsStateWithLifecycle()
@@ -33,6 +47,8 @@ fun PlacesRoute(
             viewmodel.obtainEvent(PlaceEvent.MakeFavorite(place, favorite))
         },
         highlightSelectedPlace = highlightSelectedPlace,
+        onSearchClicked = onSearchClicked,
+        onSettingsClicked = onSettingsClicked,
         modifier = modifier
     )
 }
@@ -43,27 +59,29 @@ fun PlacesScreen(
     onPlaceClick: (Long) -> Unit,
     highlightSelectedPlace: Boolean,
     favoritePlace: (Place, Boolean) -> Unit,
+    onSearchClicked: () -> Unit,
+    onSettingsClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
-    ) {
-        when (uiState) {
-            PlacesUiState.Empty -> {
-                EmptyPlacesContent()
-            }
+    when (uiState) {
+        PlacesUiState.Empty -> {
+            EmptyPlacesContent(modifier)
+        }
 
-            PlacesUiState.Loading -> {
-                val loadingContentDescription = stringResource(R.string.loading_places_description)
-                LoadingContent(loadingContentDescription)
-            }
+        PlacesUiState.Loading -> {
+            val loadingContentDescription = stringResource(R.string.loading_places_description)
+            LoadingContent(loadingContentDescription, modifier)
+        }
 
-            is PlacesUiState.Success -> {
+        is PlacesUiState.Success -> {
+            Column(modifier) {
+                PlacesToolbar(
+                    onSettingsClicked = onSettingsClicked,
+                    onSearchClicked = onSearchClicked
+                )
                 PlacesTabContent(
-                    places = uiState.places,
+                    successUiState = uiState,
                     onPlaceClicked = onPlaceClick,
-                    selectedPlaceId = uiState.selectedPlaceId,
                     favoritePlace = favoritePlace,
                     highlightSelectedPlace = highlightSelectedPlace
                 )
@@ -72,45 +90,25 @@ fun PlacesScreen(
     }
 }
 
-/*
+
 @Composable
-fun PlacesScreen(
-    selectedPlaceId: Long?,
-    isNoPlaces: Boolean,
-    isPlacesLoading: Boolean,
-    placesState: PlacesUiState,
-    onPlaceClicked: (Long) -> Unit,
-    onPlaceFavoriteChanged: (Place, Boolean) -> Unit,
-    modifier: Modifier = Modifier
+private fun PlacesToolbar(
+    onSearchClicked: () -> Unit,
+    onSettingsClicked: () -> Unit
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
-        LazyVerticalStaggeredGrid(
-            columns = StaggeredGridCells.Adaptive(300.dp),
-            contentPadding = PaddingValues(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalItemSpacing = 16.dp,
-            modifier = modifier,
-        ) {
-            placesFeed(
-                placesState = placesState,
-                onPlaceFavoriteChanged = onPlaceFavoriteChanged,
-                onPlaceClicked = onPlaceClicked
-            )
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 5.dp, end = 5.dp, top = 8.dp)
+    ) {
+        IconButton(onSearchClicked) {
+            Icon(Icons.Default.Search, contentDescription = "Search places")
         }
-        AnimatedVisibility(visible = isNoPlaces) { EmptyPlacesContent() }
-        AnimatedVisibility(visible = isPlacesLoading) {
-            val loadingContentDescription = "Loading places..."
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column {
-                    CircularProgressIndicator()
-                    Text(loadingContentDescription)
-                }
-            }
+        Text("Kolumbus", style = MaterialTheme.typography.titleLarge)
+        IconButton(onSettingsClicked) {
+            Icon(Icons.Default.Settings, contentDescription = "Open settings")
         }
     }
-}*/
+}

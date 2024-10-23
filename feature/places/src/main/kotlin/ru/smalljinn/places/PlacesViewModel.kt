@@ -7,9 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ru.smalljinn.kolumbus.data.repository.PlacesRepository
+import ru.smalljinn.kolumbus.data.repository.UserSettingsRepository
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.ui.PlacesUiState
 import javax.inject.Inject
@@ -19,19 +21,23 @@ const val PLACE_ID_KEY = "selectedPlaceId"
 @HiltViewModel
 class PlacesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    private val placesRepository: PlacesRepository
+    private val placesRepository: PlacesRepository,
+    userSettingsRepository: UserSettingsRepository
 ) : ViewModel() {
     private val selectedPlaceId: StateFlow<Long?> = savedStateHandle.getStateFlow(
         key = PLACE_ID_KEY,
         initialValue = null
     )
 
+    private val useCompactMode = userSettingsRepository.settings.map { it.useCompactPlaceCardMode }
+
     val placesState: StateFlow<PlacesUiState> = combine(
         selectedPlaceId,
-        placesRepository.getPlacesStream()
-    ) { selectedPlaceId, places ->
+        placesRepository.getPlacesStream(),
+        useCompactMode
+    ) { selectedPlaceId, places, useCompactMode ->
         if (places.isEmpty()) PlacesUiState.Empty
-        else PlacesUiState.Success(selectedPlaceId, places)
+        else PlacesUiState.Success(selectedPlaceId, places, useCompactMode)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,

@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -200,7 +201,7 @@ fun PlaceScreen(
             if (!permissionState.hasAtLeastOneLocationAccess) showDialogForLocationPermission = true
         },
         onSetHeaderImage = viewModel::setHeaderImage,
-        isGpsRequestDenied = gpsRequestDenied
+        isGpsRequestDenied = gpsRequestDenied,
     )
 }
 
@@ -235,14 +236,13 @@ internal fun PlaceScreen(
     val placeLazyListState = rememberLazyListState()
     var columnScrollingEnabled by remember { mutableStateOf(true) }
     LazyColumn(
-        modifier = modifier.imePadding(),
+        modifier = modifier
+            .imePadding()
+            .systemBarsPadding(),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         userScrollEnabled = columnScrollingEnabled,
         state = placeLazyListState
     ) {
-        /*item {
-            Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
-        }*/
         when {
             placeUiState.error -> Unit //TODO("error content with retry button")
             placeUiState.loading -> item { LoadingContent(stringResource(R.string.loading_place)) }
@@ -294,6 +294,7 @@ internal fun PlaceScreen(
         }
     }
 }
+
 
 @Composable
 private fun PlaceImagesRow(
@@ -628,7 +629,7 @@ private fun PlaceToolbar(
     isDataProcessing: Boolean,
     canSave: Boolean
 ) {
-    Box(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
+    Box(modifier = modifier.background(MaterialTheme.colorScheme.surface).padding(top = 8.dp)) {
         AnimatedContent(targetState = isEditing, label = "AnimatedPlaceToolbar") { editing ->
             if (editing) PlaceEditingButtons(
                 cancelEditing = onCancelEditing,

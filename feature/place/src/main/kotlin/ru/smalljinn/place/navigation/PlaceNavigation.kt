@@ -24,7 +24,7 @@ fun NavGraphBuilder.placeScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
     onPlaceDelete: (placeId: Long, title: String) -> Unit,
-    onShowMessage: (Int) -> Unit
+    onShowMessage: (Int) -> Unit,
 ) {
     composable<PlaceRoute> {
         PlaceScreen(

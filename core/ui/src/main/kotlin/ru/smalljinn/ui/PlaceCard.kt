@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
@@ -24,10 +25,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import kotlinx.datetime.Clock
 import ru.smalljinn.model.data.Place
+import ru.smalljinn.model.data.Position
 
 @Composable
 fun PlaceCard(
@@ -35,11 +39,11 @@ fun PlaceCard(
     onClick: () -> Unit,
     onFavorite: () -> Unit,
     isSelected: Boolean = false,
+    compactStyle: Boolean,
     place: Place
 ) {
-    val headerImageUrl = remember {
+    val headerImageUrl = remember(place.images) {
         with(place) {
-            //TODO maybe save url instead of id of header image?
             images.find { image -> image.id == headerImageId }?.url ?: images.firstOrNull()?.url
         }
     }
@@ -55,31 +59,74 @@ fun PlaceCard(
         ),
         modifier = modifier
     ) {
-        Column {
-            PlaceHeaderImage(
+        if (compactStyle) {
+            CompactPlaceCard(
                 headerImageUrl = headerImageUrl,
-                modifier = Modifier.height(180.dp)
+                place = place,
+                onFavorite = onFavorite
             )
-            //Text column
-            Column(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    PlaceTitle(place.title, modifier = Modifier.fillMaxWidth(.8f))
-                    Spacer(Modifier.weight(1f))
-                    FavoriteButton(
-                        isFavorite = place.favorite,
-                        onClick = onFavorite
-                    )
-                }
-                CreationDate(place.creationDate)
-                if (place.description.isNotBlank()) PlaceDescription(place.description)
-            }
+        } else {
+            FullPlaceCard(headerImageUrl = headerImageUrl, place = place, onFavorite = onFavorite)
         }
+    }
+}
 
+@Composable
+private fun CompactPlaceCard(
+    headerImageUrl: String?,
+    place: Place,
+    onFavorite: () -> Unit
+) {
+    val maxCardHeight = 128.dp
+    Row(Modifier.height(maxCardHeight), verticalAlignment = Alignment.CenterVertically) {
+        PlaceHeaderImage(headerImageUrl = headerImageUrl, Modifier.size(maxCardHeight))
+        PlaceTitleWithDescription(place = place, compact = true, onFavorite = onFavorite)
+    }
+}
+
+@Composable
+private fun FullPlaceCard(
+    headerImageUrl: String?,
+    place: Place,
+    onFavorite: () -> Unit
+) {
+    Column {
+        PlaceHeaderImage(
+            headerImageUrl = headerImageUrl,
+            modifier = Modifier.height(180.dp)
+        )
+        //Text column
+        PlaceTitleWithDescription(place = place, compact = false, onFavorite = onFavorite)
+    }
+}
+
+@Composable
+private fun PlaceTitleWithDescription(place: Place, compact: Boolean, onFavorite: () -> Unit) {
+    val contentPadding = remember(compact) { if (compact) 8.dp else 16.dp }
+    val verticalArrangement = remember(compact) { if (compact) 2.dp else 8.dp }
+    Column(
+        modifier = Modifier.padding(contentPadding),
+        verticalArrangement = Arrangement.spacedBy(verticalArrangement)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically,) {
+            PlaceTitle(
+                placeTitle = place.title,
+                compact = compact,
+                modifier = Modifier.fillMaxWidth(.8f)
+            )
+            Spacer(Modifier.weight(1f))
+            FavoriteButton(
+                isFavorite = place.favorite,
+                onClick = onFavorite
+            )
+        }
+        CreationDate(place.creationDate)
+        if (place.description.isNotBlank()) {
+            PlaceDescription(
+                placeDescription = place.description,
+                compact = compact
+            )
+        }
     }
 }
 
@@ -114,17 +161,61 @@ private fun FavoriteButton(
 }
 
 @Composable
-private fun PlaceTitle(placeTitle: String, modifier: Modifier = Modifier) {
-    Text(placeTitle, style = MaterialTheme.typography.headlineSmall, modifier = modifier)
+private fun PlaceTitle(placeTitle: String, compact: Boolean, modifier: Modifier = Modifier) {
+    Text(
+        text = placeTitle,
+        style = if (compact) MaterialTheme.typography.titleMedium else MaterialTheme.typography.headlineSmall,
+        modifier = modifier,
+        maxLines = if (compact) 2 else 3,
+        overflow = TextOverflow.Ellipsis
+    )
 }
 
 @Composable
-private fun PlaceDescription(placeDescription: String, modifier: Modifier = Modifier) {
+private fun PlaceDescription(
+    placeDescription: String,
+    compact: Boolean,
+    modifier: Modifier = Modifier
+) {
     Text(
         placeDescription,
-        style = MaterialTheme.typography.bodyLarge,
+        style = if (compact) MaterialTheme.typography.bodyMedium else MaterialTheme.typography.bodyLarge,
         modifier = modifier,
-        maxLines = 3,
+        maxLines = if (compact) 2 else 4,
         overflow = TextOverflow.Ellipsis
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CompactPlaceCardPreview() {
+    CompactPlaceCard(
+        null, place = Place(
+            id = 1,
+            title = "I love panckakes and what?",
+            description = "This is beautiful day to eat some carrots and pumpkins! 😇\n" +
+                    "I very glad to see you 💝",
+            position = Position.initialPosition(),
+            creationDate = Clock.System.now(),
+            headerImageId = null,
+            favorite = true,
+            images = emptyList()
+        )
+    ) { }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FullPlaceCardPreview() {
+    FullPlaceCard(null, place = Place(
+        id = 1,
+        title = "I love panckakes and what?",
+        description = "This is beautiful day to eat some carrots and pumpkins! 😇\n" +
+                "I very glad to see you 💝",
+        position = Position.initialPosition(),
+        creationDate = Clock.System.now(),
+        headerImageId = null,
+        favorite = true,
+        images = emptyList()
+    )) { }
 }
