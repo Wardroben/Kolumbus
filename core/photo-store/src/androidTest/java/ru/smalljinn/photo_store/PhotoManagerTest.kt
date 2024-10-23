@@ -6,6 +6,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Before
 import org.junit.runner.RunWith
+import ru.smalljinn.core.photo_store.FileManager
+import ru.smalljinn.core.photo_store.ImageCompressor
 import ru.smalljinn.core.photo_store.PhotoManager
 import ru.smalljinn.core.photo_store.PhotoManagerImpl
 
@@ -18,7 +20,7 @@ class PhotoManagerTest {
     @Before
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
-        photoManager = PhotoManagerImpl(context)
+        photoManager = PhotoManagerImpl(context, fileManager = FileManager(context), imageCompressor = ImageCompressor(context))
         testImageUris = listOf(
             Uri.parse("android.resource://${context.packageName}/drawable/m1000x1000.jpeg"),
             Uri.parse("android.resource://${context.packageName}/drawable/walter_white_skate.jpg")
