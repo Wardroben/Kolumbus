@@ -24,7 +24,7 @@ fun DeleteDialog(
         onDismissRequest = onDismiss,
         confirmButton = {
             Button(onClick = confirmDeletion) {
-                Text("Delete")
+                Text(stringResource(R.string.delete_action))
             }
         },
         dismissButton = {

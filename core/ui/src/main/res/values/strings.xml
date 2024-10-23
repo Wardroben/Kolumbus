@@ -12,4 +12,5 @@
     <string name="stay_here_action">Stay here</string>
     <string name="cancel_editing_title">Cancel changes</string>
     <string name="cancel_editing_text">All unsaved data will be lost. Cancel changes?</string>
+    <string name="delete_action">Delete</string>
 </resources>

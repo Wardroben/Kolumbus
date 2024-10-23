@@ -12,4 +12,5 @@
     <string name="stay_here_action">Остаться</string>
     <string name="cancel_editing_title">Отмена изменений</string>
     <string name="cancel_editing_text">Все несохранённые данные будут утеряны. Отменить изменения?</string>
+    <string name="delete_action">Удалить</string>
 </resources>
