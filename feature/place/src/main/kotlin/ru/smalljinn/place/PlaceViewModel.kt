@@ -155,6 +155,7 @@ class PlaceViewModel @Inject constructor(
                 _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
             }
         }.invokeOnCompletion {
+            clearTempImages()
             setDataProcessing(false)
         }
         if (!isCanceled) endEditing()
@@ -167,6 +168,7 @@ class PlaceViewModel @Inject constructor(
             resetPlaceProperties()
             endEditing()
         }
+        clearTempImages()
     }
 
     //TODO move to intent manager or something
@@ -211,6 +213,7 @@ class PlaceViewModel @Inject constructor(
         }
     }
 
+    private fun clearTempImages() = viewModelScope.launch { photoManager.clearTemporaryImages() }
     private fun setDataProcessing(processing: Boolean) =
         _uiState.update { it.copy(isDataProcessing = processing) }
 

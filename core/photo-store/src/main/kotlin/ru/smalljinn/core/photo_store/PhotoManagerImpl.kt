@@ -41,14 +41,15 @@ class PhotoManagerImpl @Inject constructor(
                 return Result.Error(PhotoError.UNKNOWN)
             }
         }
-        fileManager.clearTempImages()
         return Result.Success(compressedImageUris.toList())
     }
 
     override suspend fun deletePhotoFromDevice(uri: Uri): Result<Unit, PhotoError> {
-        fileManager.clearTempImages()
         return fileManager.deleteImage(uri)
     }
+
+    override suspend fun clearTemporaryImages() = fileManager.clearTempImages()
+
 
     override fun getUriForTakePhoto(): Uri {
         val photoFile = PhotoFileProvider.createTemporaryFileForPhoto(context)
