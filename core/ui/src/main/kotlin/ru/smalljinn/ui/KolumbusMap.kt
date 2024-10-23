@@ -239,8 +239,8 @@ fun PositionEffect(
                     val settingsTask = settingsClient.checkLocationSettings(settingsRequest)
 
                     settingsTask.addOnSuccessListener {
-                        locationClient.lastLocation.addOnSuccessListener {
-                            currentOnGetPosition(it.toPosition())
+                        locationClient.lastLocation.addOnSuccessListener { location ->
+                            if (location != null) currentOnGetPosition(location.toPosition())
                         }
                         locationClient.requestLocationUpdates(
                             locationRequest,
