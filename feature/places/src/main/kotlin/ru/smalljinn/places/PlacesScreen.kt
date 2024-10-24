@@ -1,5 +1,6 @@
 package ru.smalljinn.places
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,6 +11,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -81,6 +83,9 @@ fun PlacesScreen(
                     onSettingsClicked = onSettingsClicked,
                     onSearchClicked = onSearchClicked
                 )
+                AnimatedVisibility(visible = uiState.isDataSyncing) {
+                    LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
                 PlacesTabContent(
                     places = uiState.places,
                     selectedPlaceId = uiState.selectedPlaceId,

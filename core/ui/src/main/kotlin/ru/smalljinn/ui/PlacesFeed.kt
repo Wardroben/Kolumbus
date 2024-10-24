@@ -8,18 +8,17 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridScope
 import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.ui.Modifier
 import ru.smalljinn.model.data.Place
-
 sealed interface PlacesUiState {
     data object Loading : PlacesUiState
     data class Success(
         val selectedPlaceId: Long?,
         val places: List<Place>,
-        val useCompactMode: Boolean
+        val useCompactMode: Boolean,
+        val isDataSyncing: Boolean
     ) : PlacesUiState
 
     data object Empty : PlacesUiState
 }
-
 fun LazyStaggeredGridScope.placesFeed(
     placesState: PlacesUiState,
     onPlaceClicked: (Long) -> Unit,

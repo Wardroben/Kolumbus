@@ -23,7 +23,7 @@ const val PLACE_ID_KEY = "selectedPlaceId"
 class PlacesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
-    private val syncManager: SyncManager,
+    syncManager: SyncManager,
     userSettingsRepository: UserSettingsRepository,
 ) : ViewModel() {
     private val selectedPlaceId: StateFlow<Long?> = savedStateHandle.getStateFlow(
@@ -40,7 +40,12 @@ class PlacesViewModel @Inject constructor(
         syncManager.isSyncing
     ) { selectedPlaceId, places, useCompactMode, isSyncing ->
         if (places.isEmpty()) PlacesUiState.Empty
-        else PlacesUiState.Success(selectedPlaceId, places, useCompactMode)
+        else PlacesUiState.Success(
+            selectedPlaceId = selectedPlaceId,
+            places = places,
+            useCompactMode = useCompactMode,
+            isDataSyncing = isSyncing
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
@@ -63,6 +68,8 @@ class PlacesViewModel @Inject constructor(
         }
     }
 }
+
+
 
 sealed interface PlaceEvent {
     data class MakeFavorite(val place: Place, val favorite: Boolean) : PlaceEvent
