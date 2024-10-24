@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ru.smalljinn.kolumbus.data.repository.PlacesRepository
 import ru.smalljinn.kolumbus.data.repository.UserSettingsRepository
+import ru.smalljinn.kolumbus.data.util.SyncManager
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.ui.PlacesUiState
 import javax.inject.Inject
@@ -22,7 +23,8 @@ const val PLACE_ID_KEY = "selectedPlaceId"
 class PlacesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
-    userSettingsRepository: UserSettingsRepository
+    private val syncManager: SyncManager,
+    userSettingsRepository: UserSettingsRepository,
 ) : ViewModel() {
     private val selectedPlaceId: StateFlow<Long?> = savedStateHandle.getStateFlow(
         key = PLACE_ID_KEY,
@@ -34,8 +36,9 @@ class PlacesViewModel @Inject constructor(
     val placesState: StateFlow<PlacesUiState> = combine(
         selectedPlaceId,
         placesRepository.getPlacesStream(),
-        useCompactMode
-    ) { selectedPlaceId, places, useCompactMode ->
+        useCompactMode,
+        syncManager.isSyncing
+    ) { selectedPlaceId, places, useCompactMode, isSyncing ->
         if (places.isEmpty()) PlacesUiState.Empty
         else PlacesUiState.Success(selectedPlaceId, places, useCompactMode)
     }.stateIn(

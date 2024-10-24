@@ -23,7 +23,6 @@ class SearchViewModel @Inject constructor(
     private val searchPlacesRepository: SearchPlacesRepository,
     private val placesRepository: PlacesRepository
 ) : ViewModel() {
-
     val searchQuery = savedStateHandle.getStateFlow(key = SEARCH_QUERY, initialValue = "")
 
     val searchResultUiState: StateFlow<SearchResultUiState> =
@@ -36,7 +35,7 @@ class SearchViewModel @Inject constructor(
                         if (query.length < SEARCH_MIN_QUERY_LENGTH) {
                             flowOf<SearchResultUiState>(SearchResultUiState.EmptyQuery)
                         } else {
-                            searchPlacesRepository.searchPlaces("%$query%")
+                            searchPlacesRepository.searchPlaces(query)
                                 .map<List<Place>,SearchResultUiState> { places ->
                                     SearchResultUiState.Success(places)
                                 }

@@ -38,6 +38,8 @@
             <option value="$PROJECT_DIR$/feature/places" />
             <option value="$PROJECT_DIR$/feature/search" />
             <option value="$PROJECT_DIR$/feature/settings" />
+            <option value="$PROJECT_DIR$/sync" />
+            <option value="$PROJECT_DIR$/sync/work" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

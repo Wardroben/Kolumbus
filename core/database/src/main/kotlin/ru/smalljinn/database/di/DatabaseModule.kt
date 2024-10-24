@@ -21,5 +21,6 @@ internal object DatabaseModule {
         context = context,
         klass = KolumbusDatabase::class.java,
         name = "kolumbus-database"
-    ).build()
+    )
+        .build()
 }
