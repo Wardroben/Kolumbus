@@ -46,16 +46,16 @@ class MainActivity : ComponentActivity() {
                             )
                     ) {
                         //Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
-                            KolumbusNavHost(
-                                appState = appState,
-                                onShowMessage = { messageId: Int ->
-                                    appState.coroutineScope.launch {
-                                        appState.snackbarHostState.showSnackbar(
-                                            message = context.getString(messageId)
-                                        )
-                                    }
+                        KolumbusNavHost(
+                            appState = appState,
+                            onShowMessage = { messageId: Int ->
+                                appState.coroutineScope.launch {
+                                    appState.snackbarHostState.showSnackbar(
+                                        message = context.getString(messageId)
+                                    )
                                 }
-                            )
+                            }
+                        )
                     }
                 }
             }

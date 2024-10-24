@@ -50,6 +50,7 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
+import com.google.android.gms.maps.CameraUpdate
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
@@ -96,12 +97,9 @@ fun KolumbusMap(
     val cameraPositionState = rememberCameraPositionState()
 
     fun animateCamera(position: LatLng) {
-        val cameraUpdate = CameraUpdateFactory.newCameraPosition(
-            CameraPosition.fromLatLngZoom(position, zoom)
-        )
         coroutineScope.launch {
             cameraPositionState.animate(
-                cameraUpdate,
+                getCameraUpdate(position, zoom),
                 MAP_POSITION_ANIMATION_DURATION
             )
         }
@@ -120,7 +118,7 @@ fun KolumbusMap(
             //animates camera to new place position (used for moving camera when map loaded and when
             //user cancels editing of place to return previous position
         } else if (!shouldReceivePositionUpdates && !placePosition.isInit) {
-            animateCamera(placePosition.toLatLng())
+            cameraPositionState.move(getCameraUpdate(placePosition.toLatLng(), zoom))
         }
     }
 
@@ -172,7 +170,10 @@ fun KolumbusMap(
                 Icons.Default.LocationOn,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.align(Alignment.Center).padding(bottom = 36.dp).size(48.dp)
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(bottom = 36.dp)
+                    .size(48.dp)
             )
         }
         AnimatedVisibility(
@@ -191,6 +192,11 @@ fun KolumbusMap(
         }
     }
 }
+
+private fun getCameraUpdate(position: LatLng, zoom: Float): CameraUpdate =
+    CameraUpdateFactory.newCameraPosition(
+        CameraPosition.fromLatLngZoom(position, zoom)
+    )
 
 @RequiresPermission(
     anyOf = [Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION],
@@ -220,7 +226,6 @@ fun PositionEffect(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-
 
 
                     val priority = if (usePreciseLocation) {
