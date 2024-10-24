@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="places_with_content_not_found_label">Places with content: %1$s not found</string>
+    <string name="places_with_content_not_found_label">Places with content: \"%1$s\" not found</string>
     <string name="empty_query_hint">Enter search query to find places</string>
     <string name="go_back_action">Go back</string>
     <string name="search_cd">Search</string>

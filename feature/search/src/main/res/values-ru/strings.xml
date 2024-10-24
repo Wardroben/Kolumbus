@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="places_with_content_not_found_label">Места с содержимым: %1$s не найдены</string>
+    <string name="places_with_content_not_found_label">Места с содержимым: \"%1$s\" не найдены</string>
     <string name="empty_query_hint">Введи запрос поиска чтобы найти места</string>
     <string name="go_back_action">Вернуться</string>
     <string name="search_cd">Поиск</string>
