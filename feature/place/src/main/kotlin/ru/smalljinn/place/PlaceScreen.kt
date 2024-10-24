@@ -553,7 +553,6 @@ private fun LazyListScope.placeDetailBody(
                         }
                     }
                 },
-            //TODO if placePosition null and userPosition null
             placePosition = placeDetailState.placePosition ?: Position.initialPosition(),
             userPosition = placeDetailState.userPosition ?: Position.initialPosition(),
             onUserPositionUpdated = onUserPositionUpdated,

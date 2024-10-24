@@ -174,15 +174,19 @@ class PlaceViewModel @Inject constructor(
     //TODO move to intent manager or something
     fun createShareIntent(): Intent {
         with(uiState1.value) {
-            val imageUris: ArrayList<Uri> = ArrayList(images.map { it.url.toUri() })
-            val headerImageUri = images.find { it.id == headerImageId }?.url?.toUri() ?: imageUris.first()
-            val intentText = "$title\n\n" +
-                    "$description\n\n" +
-                    "https://www.google.com/maps/place/${placePosition?.latitude},${placePosition?.longitude}"
+            //val imageUris: ArrayList<Uri> = ArrayList(images.map { it.url.toUri() })
+            val headerImageUri =
+                images.find { it.id == headerImageId }?.url?.toUri() ?: images.first().url.toUri()
+            val text = buildString {
+                append(title)
+                if (description.isNotBlank()) append("\n\n$description")
+                if (placePosition != null)
+                    append("\n\nhttps://www.google.com/maps/place/${placePosition.latitude},${placePosition.longitude}")
+            }
             val shareIntent: Intent = Intent().apply {
                 action = Intent.ACTION_SEND
                 putExtra(Intent.EXTRA_TITLE, "Sharing place")
-                putExtra(Intent.EXTRA_TEXT, intentText)
+                putExtra(Intent.EXTRA_TEXT, text)
                 putExtra(Intent.EXTRA_STREAM, headerImageUri)
                 setDataAndType(headerImageUri, "image/*")
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
@@ -255,6 +259,7 @@ internal data class PlaceDetailState(
 ) {
     val editable: Boolean
         get() = placeMode != PlaceMode.VIEW
+
     fun getPlaceToInsert(id: Long, favorite: Boolean) = Place(
         id = id,
         title = title,

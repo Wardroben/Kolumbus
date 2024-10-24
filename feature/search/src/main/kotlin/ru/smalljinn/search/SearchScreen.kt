@@ -175,7 +175,7 @@ private fun SearchTextField(
 
 @Composable
 private fun SupportingSearchText(text: String, modifier: Modifier = Modifier) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.padding(48.dp)) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier.padding(24.dp)) {
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
