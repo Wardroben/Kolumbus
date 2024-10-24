@@ -5,4 +5,6 @@
     <string name="go_back_action">Go back</string>
     <string name="search_cd">Search</string>
     <string name="clear_search_text_cd">Clear search text</string>
+    <string name="results_loading_label">Results loading…</string>
+    <string name="error_loading_search_results">Error loading results</string>
 </resources>

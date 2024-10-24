@@ -78,8 +78,8 @@ fun SearchScreen(
         when (uiState) {
             SearchResultUiState.EmptyQuery -> SupportingSearchText(text = stringResource(R.string.empty_query_hint))
 
-            SearchResultUiState.Loading,
-            SearchResultUiState.LoadFailed -> SupportingSearchText("error")
+            SearchResultUiState.Loading -> SupportingSearchText(stringResource(R.string.results_loading_label))
+            SearchResultUiState.LoadFailed -> SupportingSearchText(stringResource(R.string.error_loading_search_results))
 
             SearchResultUiState.NothingToLookFor -> SupportingSearchText(text = "Ну и что ты собрался искать, когда у тебя меток кот наплакал?")
             is SearchResultUiState.Success -> {

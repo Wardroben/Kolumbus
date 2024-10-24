@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="places_with_content_not_found_label">Places with content: %1$s not found</string>
+    <string name="places_with_content_not_found_label">Места с содержимым: %1$s не найдены</string>
     <string name="empty_query_hint">Введи запрос поиска чтобы найти места</string>
     <string name="go_back_action">Вернуться</string>
     <string name="search_cd">Поиск</string>
     <string name="clear_search_text_cd">Очистить запрос поиска</string>
+    <string name="results_loading_label">Резултаты загружаются…</string>
+    <string name="error_loading_search_results">"Ошибка при загрузке результатов "</string>
 </resources>
