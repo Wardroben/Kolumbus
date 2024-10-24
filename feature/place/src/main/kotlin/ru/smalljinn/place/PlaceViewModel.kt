@@ -253,6 +253,8 @@ internal data class PlaceDetailState(
     val error: Boolean = false,
     val loading: Boolean = true
 ) {
+    val editable: Boolean
+        get() = placeMode != PlaceMode.VIEW
     fun getPlaceToInsert(id: Long, favorite: Boolean) = Place(
         id = id,
         title = title,

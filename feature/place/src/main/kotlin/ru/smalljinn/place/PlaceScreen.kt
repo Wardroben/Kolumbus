@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.sizeIn
@@ -562,19 +561,19 @@ private fun LazyListScope.placeDetailBody(
             onGpsUnavailableResolvable = onGpsUnavailableResolvable,
             hasLocationPermission = permissionState.hasAtLeastOneLocationAccess,
             usePreciseLocation = permissionState.hasFineLocationAccess,
-            shouldReceivePositionUpdates = placeDetailState.placeMode != PlaceMode.VIEW,
+            shouldReceivePositionUpdates = placeDetailState.editable,
             isGpsRequestDenied = isGpsRequestDenied,
             followUserPositionAtStart = placeDetailState.placeMode == PlaceMode.CREATING,
             showNoLocationPermissionsRationale = onRequestLocationPermission,
-            shouldShowPlaceMarker = placeDetailState.placeMode == PlaceMode.VIEW,
-            shouldShowPlacePositionEditingMarker = placeDetailState.placeMode != PlaceMode.VIEW
+            shouldShowPlaceMarker = !placeDetailState.editable,
+            shouldShowPlacePositionEditingMarker = placeDetailState.editable
         )
     }
     item {
         //title
         TransparentTextField(
             text = placeDetailState.title,
-            readOnly = placeDetailState.placeMode == PlaceMode.VIEW,
+            readOnly = !placeDetailState.editable,
             onTextChanged = onTitleChanged,
             style = MaterialTheme.typography.titleLarge,
             hintText = stringResource(R.string.title_cd),
@@ -593,23 +592,18 @@ private fun LazyListScope.placeDetailBody(
     item {
         //Description
         AnimatedVisibility(
-            placeDetailState.placeMode != PlaceMode.VIEW || placeDetailState.description.isNotBlank(),
+            placeDetailState.editable || placeDetailState.description.isNotBlank(),
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
             TransparentTextField(
                 text = placeDetailState.description,
-                readOnly = placeDetailState.placeMode == PlaceMode.VIEW,
+                readOnly = !placeDetailState.editable,
                 onTextChanged = onDescriptionChanged,
                 style = MaterialTheme.typography.bodyLarge,
                 hintText = stringResource(R.string.description_cd),
-                shouldShowHint = placeDetailState.placeMode != PlaceMode.VIEW && placeDetailState.description.isBlank(),
-                modifier = Modifier
-                    .heightIn(
-                        100.dp,
-                        max = if (placeDetailState.placeMode == PlaceMode.VIEW) Int.MAX_VALUE.dp else 300.dp
-                    )
-                    .padding(horizontal = 16.dp)
+                shouldShowHint = placeDetailState.editable && placeDetailState.description.isBlank(),
+                modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
     }
@@ -629,7 +623,9 @@ private fun PlaceToolbar(
     isDataProcessing: Boolean,
     canSave: Boolean
 ) {
-    Box(modifier = modifier.background(MaterialTheme.colorScheme.surface).padding(top = 8.dp)) {
+    Box(modifier = modifier
+        .background(MaterialTheme.colorScheme.surface)
+        .padding(top = 8.dp)) {
         AnimatedContent(targetState = isEditing, label = "AnimatedPlaceToolbar") { editing ->
             if (editing) PlaceEditingButtons(
                 cancelEditing = onCancelEditing,

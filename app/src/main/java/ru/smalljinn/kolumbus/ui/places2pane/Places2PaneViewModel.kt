@@ -22,19 +22,20 @@ const val PLACE_ID_KEY = "selectedPlaceId"
 class Places2PaneViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val deletePlaceUseCase: DeletePlaceUseCase
-): ViewModel() {
+) : ViewModel() {
     private val route = savedStateHandle.toRoute<PlacesRoute>()
 
-    private val selectedPlaceId: StateFlow<Long?> = savedStateHandle.getStateFlow(
+    val selectedPlaceId: StateFlow<Long?> = savedStateHandle.getStateFlow(
         key = PLACE_ID_KEY,
         initialValue = route.initialPlaceId
     )
+
     private val placeToDelete = MutableStateFlow<Place2PaneState.PlaceToDelete?>(null)
 
-    val state = combine(selectedPlaceId, placeToDelete) {selectedPlaceId, placeToDelete ->
+    val state = combine(selectedPlaceId, placeToDelete) { selectedPlaceId, placeToDelete ->
         Place2PaneState(
-            selectedPlaceId,
-            placeToDelete
+            selectedPlaceId = selectedPlaceId,
+            placeToDelete = placeToDelete
         )
     }.stateIn(
         viewModelScope,

@@ -6,6 +6,7 @@ import androidx.navigation.compose.NavHost
 import ru.smalljinn.kolumbus.ui.KolumbusAppState
 import ru.smalljinn.kolumbus.ui.places2pane.placesListDetailScreen
 import ru.smalljinn.places.navigation.PlacesRoute
+import ru.smalljinn.places.navigation.navigateToPlaces
 import ru.smalljinn.search.navigation.navigateToSearch
 import ru.smalljinn.search.navigation.searchScreen
 
@@ -17,7 +18,13 @@ fun KolumbusNavHost(
 ) {
     val navController = appState.navController
     NavHost(navController = navController, startDestination = PlacesRoute(), modifier = modifier) {
-        placesListDetailScreen(onShowMessage = onShowMessage, onSearchClicked = { navController.navigateToSearch()})
-        searchScreen(onBackClick = { navController.navigateUp() }, onPlaceClicked = {})
+        placesListDetailScreen(
+            onShowMessage = onShowMessage,
+            onSearchClicked = navController::navigateToSearch
+        )
+        searchScreen(
+            onBackClick = navController::popBackStack,
+            onPlaceClicked = navController::navigateToPlaces
+        )
     }
 }

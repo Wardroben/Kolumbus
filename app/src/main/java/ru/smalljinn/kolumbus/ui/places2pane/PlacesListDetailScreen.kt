@@ -71,16 +71,20 @@ fun NavGraphBuilder.placesListDetailScreen(
 @Composable
 internal fun PlacesListDetailScreen(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
+    viewModel: Places2PaneViewModel = hiltViewModel(),
     onShowMessage: (Int) -> Unit,
-    onSearchClicked: () -> Unit,
-    viewModel: Places2PaneViewModel = hiltViewModel()
+    onSearchClicked: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+
+    //TODO why if read id from state navigate to place not working, but this way is?
+    val selectedPlaceId by viewModel.selectedPlaceId.collectAsStateWithLifecycle()
 
     var showSettingsDialog by rememberSaveable { mutableStateOf(false) }
     if (showSettingsDialog) SettingsDialog(onDismiss = { showSettingsDialog = false })
     PlacesListDetailScreen(
         windowAdaptiveInfo = windowAdaptiveInfo,
+        selectedPlaceId = selectedPlaceId,
         placesState = state,
         onPlaceClick = { viewModel.selectPlace(it) },
         setPlaceToDelete = { id, title -> viewModel.setToDeletePlace(id, title) },
@@ -96,6 +100,7 @@ internal fun PlacesListDetailScreen(
 @Composable
 fun PlacesListDetailScreen(
     onPlaceClick: (Long) -> Unit,
+    selectedPlaceId: Long?,
     placesState: Place2PaneState,
     setPlaceToDelete: (placeId: Long, title: String) -> Unit,
     onDeleteDismiss: () -> Unit,
@@ -110,7 +115,7 @@ fun PlacesListDetailScreen(
         initialDestinationHistory = listOfNotNull(
             ThreePaneScaffoldDestinationItem(ListDetailPaneScaffoldRole.List),
             ThreePaneScaffoldDestinationItem<Nothing>(ListDetailPaneScaffoldRole.Detail).takeIf {
-                placesState.selectedPlaceId != null
+                selectedPlaceId != null
             }
         )
     )
@@ -119,7 +124,7 @@ fun PlacesListDetailScreen(
 
     var nestedNavHostStartRoute by remember {
         val route =
-            placesState.selectedPlaceId?.let { PlaceRoute(id = it) } ?: PlacePlaceholderRoute
+            selectedPlaceId?.let { PlaceRoute(id = it) } ?: PlacePlaceholderRoute
         mutableStateOf(route)
     }
     var nestedNavKey by rememberSaveable(stateSaver = Saver({ it.toString() }, UUID::fromString)) {
@@ -185,8 +190,8 @@ fun PlacesListDetailScreen(
                         route = DetailPaneNavHostRoute::class
                     ) {
                         placeScreen(
-                            onBackClick = listDetailNavigator::navigateBack,
                             showBackButton = !listDetailNavigator.isListPaneVisible(),
+                            onBackClick = listDetailNavigator::navigateBack,
                             onPlaceDelete = { id, title -> setPlaceToDelete(id, title) },
                             onShowMessage = onShowMessage
                         )
