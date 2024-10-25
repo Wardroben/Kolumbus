@@ -6,11 +6,12 @@ import androidx.room.Fts4
 
 @Entity(tableName = "places_fts")
 @Fts4(
-    //contentEntity = PlaceEntity::class
+    //it is needed for automatic changes in places_fts when PlaceEntity changes
+    contentEntity = PlaceEntity::class
 )
 data class PlaceFtsEntity(
-    @ColumnInfo(name = "placeId")
-    val placeId: String,
+    //placeId removed because default rowid used.
+    /*@ColumnInfo(name = "placeId") val placeId: String,*/
     @ColumnInfo(name = "title")
     val title: String,
     @ColumnInfo(name = "description")
@@ -18,7 +19,7 @@ data class PlaceFtsEntity(
 )
 
 fun PlaceEntity.toPlaceFts() = PlaceFtsEntity(
-    placeId = id.toString(),
+    //placeId = id.toString(),
     title = title,
     description = description
 )

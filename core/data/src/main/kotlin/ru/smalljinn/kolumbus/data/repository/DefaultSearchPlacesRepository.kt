@@ -29,7 +29,7 @@ class DefaultSearchPlacesRepository @Inject constructor(
     }
 
     override fun searchPlaces(query: String): Flow<List<Place>> {
-        val placeStringIds: Flow<List<String>> = searchPlaceDao.searchPlaces("*$query*")
+        val placeStringIds: Flow<List<Int>> = searchPlaceDao.searchPlaces("*$query*")
         val placesFlow = placeStringIds
             .mapLatest { stringIds ->
                 stringIds

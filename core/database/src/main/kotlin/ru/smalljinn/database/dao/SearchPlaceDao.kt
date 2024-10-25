@@ -7,7 +7,7 @@ import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 import ru.smalljinn.database.model.PlaceFtsEntity
 
-private typealias PlaceStringId = String
+private typealias PlaceFtsId = Int
 
 @Dao
 interface SearchPlaceDao {
@@ -15,10 +15,10 @@ interface SearchPlaceDao {
     suspend fun insertAll(places: List<PlaceFtsEntity>)
 
     @Query("""
-        SELECT placeId FROM places_fts 
+        SELECT rowid FROM places_fts 
         WHERE places_fts MATCH :query
     """)
-    fun searchPlaces(query: String): Flow<List<PlaceStringId>>
+    fun searchPlaces(query: String): Flow<List<PlaceFtsId>>
 
     @Query("SELECT count(*) from places_fts")
     fun getPlacesCount(): Flow<Int>
