@@ -31,7 +31,7 @@ fun TransparentTextField(
     imeAction: ImeAction = ImeAction.Default
 ) {
     val contentColor = LocalContentColor.current
-    Box(modifier = modifier, contentAlignment = Alignment.TopCenter) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
         TextField(
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
@@ -50,7 +50,6 @@ fun TransparentTextField(
             maxLines = if (!readOnly) MAX_EDITABLE_DESCRIPTION_TEXT_FIELD_LINES else Int.MAX_VALUE,
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier.fillMaxWidth()
-
         )
         hintText?.let {
             if (shouldShowHint) {
