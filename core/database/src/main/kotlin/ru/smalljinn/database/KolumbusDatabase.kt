@@ -20,10 +20,11 @@ import ru.smalljinn.database.util.UriConverter
         ImageEntity::class,
         PlaceFtsEntity::class
     ],
-    version = 3,
+    version = 4,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
-        AutoMigration(from = 2, to = 3, spec = DatabaseMigrations.Schema2to3::class)
+        AutoMigration(from = 2, to = 3, spec = DatabaseMigrations.Schema2to3::class),
+        AutoMigration(from = 3, to = 4)
     ]
 )
 @TypeConverters(

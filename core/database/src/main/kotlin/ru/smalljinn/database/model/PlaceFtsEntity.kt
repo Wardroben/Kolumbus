@@ -3,11 +3,13 @@ package ru.smalljinn.database.model
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Fts4
+import androidx.room.FtsOptions
 
 @Entity(tableName = "places_fts")
 @Fts4(
     //it is needed for automatic changes in places_fts when PlaceEntity changes
-    contentEntity = PlaceEntity::class
+    contentEntity = PlaceEntity::class,
+    tokenizer = FtsOptions.TOKENIZER_UNICODE61
 )
 data class PlaceFtsEntity(
     //placeId removed because default rowid used.
