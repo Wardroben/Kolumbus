@@ -51,6 +51,7 @@ interface PlaceDao {
                 THEN id IN (:filterPlaceIds)
                 ELSE 1
             END
+            ORDER BY favorite DESC, creation_date DESC
     """
     )
     fun getPlacesWithImagesStream(
