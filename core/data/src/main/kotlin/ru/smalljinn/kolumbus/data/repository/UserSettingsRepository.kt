@@ -12,4 +12,8 @@ class UserSettingsRepository @Inject constructor(
     suspend fun setPlaceCardMode(useCompact: Boolean) = withContext(Dispatchers.IO) {
         kolumbusPreferencesDataSource.setPlaceCardMode(useCompact)
     }
+
+    suspend fun setPlaceFavoriteDisplay(onlyFavorite: Boolean) = withContext(Dispatchers.IO) {
+        kolumbusPreferencesDataSource.setFavoriteDisplay(onlyFavorite)
+    }
 }

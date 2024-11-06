@@ -16,10 +16,12 @@ class KolumbusPreferencesDataSource @Inject constructor(
     private val userPreferences: DataStore<Preferences>
 ) {
     private val USE_COMPACT_PLACE_CARD_MODE = booleanPreferencesKey("place_card_compact_mode")
+    private val SHOW_ONLY_FAVORITE_PLACES = booleanPreferencesKey("show_only_favorite_places")
 
     val userData = userPreferences.data.map { preferences ->
         UserSettingsData(
-            useCompactPlaceCardMode = preferences[USE_COMPACT_PLACE_CARD_MODE] ?: false
+            useCompactPlaceCardMode = preferences[USE_COMPACT_PLACE_CARD_MODE] ?: false,
+            showOnlyFavoritePlaces = preferences[SHOW_ONLY_FAVORITE_PLACES] ?: false
         )
     }
 
@@ -30,6 +32,16 @@ class KolumbusPreferencesDataSource @Inject constructor(
             }
         } catch (e: IOException) {
             Log.e(TAG, "Failed to update place card mode", e)
+        }
+    }
+
+    suspend fun setFavoriteDisplay(onlyFavorite: Boolean) {
+        try {
+            userPreferences.edit {
+                it[SHOW_ONLY_FAVORITE_PLACES] = onlyFavorite
+            }
+        } catch (e: IOException) {
+            Log.e(TAG, "Failed to update favorite display card mode", e)
         }
     }
 }

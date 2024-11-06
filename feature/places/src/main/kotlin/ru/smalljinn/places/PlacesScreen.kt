@@ -4,13 +4,17 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +58,9 @@ fun PlacesRoute(
         highlightSelectedPlace = highlightSelectedPlace,
         onSearchClicked = onSearchClicked,
         onSettingsClicked = onSettingsClicked,
+        onFavoriteClicked = { onlyFavorite ->
+            viewmodel.obtainEvent(PlaceEvent.DisplayFavorite(onlyFavorite))
+        },
         modifier = modifier
     )
 }
@@ -65,6 +73,7 @@ fun PlacesScreen(
     favoritePlace: (Place, Boolean) -> Unit,
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
+    onFavoriteClicked: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (uiState) {
@@ -81,10 +90,15 @@ fun PlacesScreen(
             Column(modifier) {
                 PlacesToolbar(
                     onSettingsClicked = onSettingsClicked,
-                    onSearchClicked = onSearchClicked
+                    onSearchClicked = onSearchClicked,
+                    isOnlyFavorite = uiState.showOnlyFavorite,
+                    onFavoriteClicked = onFavoriteClicked
                 )
                 AnimatedVisibility(visible = uiState.isDataSyncing) {
                     LinearProgressIndicator(Modifier.fillMaxWidth())
+                }
+                AnimatedVisibility(uiState.showOnlyFavorite && uiState.isEmpty) {
+                    EmptyFavoritePlacesContent()
                 }
                 PlacesTabContent(
                     places = uiState.places,
@@ -100,7 +114,27 @@ fun PlacesScreen(
 }
 
 @Composable
+private fun EmptyFavoritePlacesContent() {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)
+    ) {
+        Text(
+            stringResource(R.string.no_favorite_places_title),
+            style = MaterialTheme.typography.titleLarge
+        )
+        Text(
+            stringResource(R.string.there_are_no_favorite_places_label),
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+@Composable
 private fun PlacesToolbar(
+    isOnlyFavorite: Boolean,
+    onFavoriteClicked: (Boolean) -> Unit,
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit
 ) {
@@ -115,8 +149,17 @@ private fun PlacesToolbar(
             Icon(Icons.Default.Search, contentDescription = "Search places")
         }
         Text("Kolumbus", style = MaterialTheme.typography.titleLarge)
-        IconButton(onSettingsClicked) {
-            Icon(Icons.Default.Settings, contentDescription = "Open settings")
+        Row {
+            IconToggleButton(checked = isOnlyFavorite, onCheckedChange = onFavoriteClicked) {
+                if (isOnlyFavorite) Icon(
+                    Icons.Default.Favorite,
+                    contentDescription = "Show all places"
+                )
+                else Icon(Icons.Default.FavoriteBorder, contentDescription = "Show favorite places")
+            }
+            IconButton(onSettingsClicked) {
+                Icon(Icons.Default.Settings, contentDescription = "Open settings")
+            }
         }
     }
 }
@@ -124,5 +167,5 @@ private fun PlacesToolbar(
 @Preview(showBackground = true)
 @Composable
 private fun PlacesToolbarPreview() {
-    PlacesToolbar({},{})
+    PlacesToolbar(isOnlyFavorite = true, {}, {}, {})
 }

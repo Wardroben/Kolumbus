@@ -24,28 +24,38 @@ class PlacesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
     syncManager: SyncManager,
-    userSettingsRepository: UserSettingsRepository,
+    private val userSettingsRepository: UserSettingsRepository,
 ) : ViewModel() {
     private val selectedPlaceId: StateFlow<Long?> = savedStateHandle.getStateFlow(
         key = PLACE_ID_KEY,
         initialValue = null
     )
+    private val userSettings = userSettingsRepository.settings
 
-    private val useCompactMode = userSettingsRepository.settings.map { it.useCompactPlaceCardMode }
+    private val filteredPlaces = combine(
+        placesRepository.getPlacesStream(),
+        userSettings.map { it.showOnlyFavoritePlaces }
+    ) { places, onlyFavorite ->
+        if (onlyFavorite) places.filter { place -> place.favorite }
+        else places
+    }
 
     val placesState: StateFlow<PlacesUiState> = combine(
         selectedPlaceId,
-        placesRepository.getPlacesStream(),
-        useCompactMode,
+        filteredPlaces,
+        userSettings,
         syncManager.isSyncing
-    ) { selectedPlaceId, places, useCompactMode, isSyncing ->
-        if (places.isEmpty()) PlacesUiState.Empty
-        else PlacesUiState.Success(
-            selectedPlaceId = selectedPlaceId,
-            places = places,
-            useCompactMode = useCompactMode,
-            isDataSyncing = isSyncing
-        )
+    ) { selectedPlaceId, places, userSettings, isSyncing ->
+        when {
+            !userSettings.showOnlyFavoritePlaces && places.isEmpty() -> PlacesUiState.Empty
+            else -> PlacesUiState.Success(
+                selectedPlaceId = selectedPlaceId,
+                places = places,
+                useCompactMode = userSettings.useCompactPlaceCardMode,
+                isDataSyncing = isSyncing,
+                showOnlyFavorite = userSettings.showOnlyFavoritePlaces
+            )
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
@@ -60,19 +70,26 @@ class PlacesViewModel @Inject constructor(
 
             is PlaceEvent.MakeFavorite -> with(event) {
                 viewModelScope.launch {
-                    placesRepository.upsertPlace(place.copy(favorite = favorite, images = emptyList()))
+                    placesRepository.upsertPlace(
+                        place.copy(
+                            favorite = favorite,
+                            images = emptyList()
+                        )
+                    )
                 }
             }
 
             is PlaceEvent.SelectPlace -> savedStateHandle[PLACE_ID_KEY] = event.placeId
+            is PlaceEvent.DisplayFavorite -> viewModelScope.launch {
+                userSettingsRepository.setPlaceFavoriteDisplay(event.onlyFavorite)
+            }
         }
     }
 }
-
-
 
 sealed interface PlaceEvent {
     data class MakeFavorite(val place: Place, val favorite: Boolean) : PlaceEvent
     data class DeletePlace(val place: Place) : PlaceEvent
     data class SelectPlace(val placeId: Long) : PlaceEvent
+    data class DisplayFavorite(val onlyFavorite: Boolean) : PlaceEvent
 }

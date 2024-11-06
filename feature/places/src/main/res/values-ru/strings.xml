@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_places_title">Kolumbus</string>
+    <string name="feature_places_navigation_content_description">Открыть поиск</string>
+    <string name="loading_places_description">Загрузка мест…</string>
+    <string name="there_are_no_favorite_places_label">Здесть нет избранных мест. Чтобы избрать место нажми ♥ на карточке места.</string>
+    <string name="no_favorite_places_title">Нет избранных мест</string>
+</resources>

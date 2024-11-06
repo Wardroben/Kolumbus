@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_places_title">Kolumbus</string>
+    <string name="feature_places_title" translatable="false">Kolumbus</string>
     <string name="feature_places_navigation_content_description">Open search</string>
     <string name="loading_places_description">Loading places…</string>
+    <string name="there_are_no_favorite_places_label">There are no favorite places. To favorite place tap ♥ at card.</string>
+    <string name="no_favorite_places_title">No favorite places</string>
 </resources>

@@ -14,34 +14,14 @@ sealed interface PlacesUiState {
         val selectedPlaceId: Long?,
         val places: List<Place>,
         val useCompactMode: Boolean,
-        val isDataSyncing: Boolean
-    ) : PlacesUiState
+        val isDataSyncing: Boolean,
+        val showOnlyFavorite: Boolean
+    ) : PlacesUiState {
+        val isEmpty: Boolean
+            get() = places.isEmpty()
+    }
 
     data object Empty : PlacesUiState
-}
-fun LazyStaggeredGridScope.placesFeed(
-    placesState: PlacesUiState,
-    onPlaceClicked: (Long) -> Unit,
-    onPlaceFavoriteChanged: (Place, Boolean) -> Unit,
-) {
-    when (placesState) {
-        PlacesUiState.Empty -> Unit
-        PlacesUiState.Loading -> Unit
-        is PlacesUiState.Success -> {
-            items(
-                items = placesState.places,
-                key = { it.id },
-                contentType = { "placesFeedItem" }) { place ->
-                PlaceCard(
-                    place = place,
-                    onClick = { onPlaceClicked(place.id) },
-                    onFavorite = { onPlaceFavoriteChanged(place, !place.favorite) },
-                    compactStyle = placesState.useCompactMode,
-                    modifier = Modifier.animateItem()
-                )
-            }
-        }
-    }
 }
 
 fun LazyStaggeredGridScope.placesFeed(
