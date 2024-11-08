@@ -90,8 +90,8 @@ fun KolumbusMap(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var followUserPosition by rememberSaveable(followUserPositionAtStart) {
-        mutableStateOf(followUserPositionAtStart)
+    var followUserPosition by rememberSaveable(followUserPositionAtStart, shouldReceivePositionUpdates) {
+        mutableStateOf(followUserPositionAtStart && shouldReceivePositionUpdates)
     }
     var zoom by remember { mutableFloatStateOf(MAP_ZOOM) }
     val cameraPositionState = rememberCameraPositionState()
@@ -111,6 +111,7 @@ fun KolumbusMap(
         userPosition,
         placePosition,
         followUserPosition,
+        shouldReceivePositionUpdates
     ) {
         //animates camera to new user position
         if (hasLocationPermission && followUserPosition && !userPosition.isInit) {
@@ -285,7 +286,7 @@ fun PositionEffect(
 }
 
 @Composable
-private fun FollowPositionButton(
+ fun FollowPositionButton(
     modifier: Modifier = Modifier,
     followingUserPosition: Boolean,
     hasLocationPermission: Boolean,
