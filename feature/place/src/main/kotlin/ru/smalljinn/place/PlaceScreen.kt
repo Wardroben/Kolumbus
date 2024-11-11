@@ -554,7 +554,8 @@ private fun LazyListScope.placeDetailBody(
                     isGpsRequestDenied = isGpsRequestDenied,
                     onUserPositionUpdated = onUserPositionUpdated,
                     onGpsUnavailableResolvable = onGpsUnavailableResolvable,
-                    showNoLocationPermissionsRationale = onRequestLocationPermission
+                    showNoLocationPermissionsRationale = onRequestLocationPermission,
+                    followUserPositionAtStart = placeDetailState.placeMode == PlaceMode.CREATING
                 )
             ),
             modifier = Modifier

@@ -55,6 +55,7 @@ data class MapConfig(
     val usePreciseLocation: Boolean,
     val isGpsRequestDenied: Boolean,
     val hasAtLeastOneLocationPermission: Boolean,
+    val followUserPositionAtStart: Boolean,
     val onUserPositionUpdated: (Position) -> Unit,
     val onGpsUnavailableResolvable: (IntentSenderRequest) -> Unit,
     val showNoLocationPermissionsRationale: () -> Unit,
@@ -171,7 +172,7 @@ fun PlaceKolumbusMap(
     val coroutineScope = rememberCoroutineScope()
     var zoom by rememberSaveable { mutableFloatStateOf(MAP_ZOOM) }
     val cameraPositionState = rememberCameraPositionState()
-    var followUserPosition by rememberSaveable { mutableStateOf(false) }
+    var followUserPosition by rememberSaveable { mutableStateOf(mapConfig.followUserPositionAtStart) }
 
     fun animateCamera(position: LatLng) {
         coroutineScope.launch {
