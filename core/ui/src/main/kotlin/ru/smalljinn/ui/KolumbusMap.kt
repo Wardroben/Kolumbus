@@ -71,6 +71,7 @@ fun Location.toPosition() = Position(latitude, longitude)
 private const val MAP_POSITION_ANIMATION_DURATION = 500
 private const val MAP_ZOOM = 16.5f
 
+
 @SuppressLint("MissingPermission")
 @Composable
 fun KolumbusMap(
@@ -90,7 +91,10 @@ fun KolumbusMap(
     modifier: Modifier = Modifier
 ) {
     val coroutineScope = rememberCoroutineScope()
-    var followUserPosition by rememberSaveable(followUserPositionAtStart, shouldReceivePositionUpdates) {
+    var followUserPosition by rememberSaveable(
+        followUserPositionAtStart,
+        shouldReceivePositionUpdates
+    ) {
         mutableStateOf(followUserPositionAtStart && shouldReceivePositionUpdates)
     }
     var zoom by remember { mutableFloatStateOf(MAP_ZOOM) }
@@ -227,8 +231,6 @@ fun PositionEffect(
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
                 Lifecycle.Event.ON_RESUME -> {
-
-
                     val priority = if (usePreciseLocation) {
                         Priority.PRIORITY_HIGH_ACCURACY
                     } else {
@@ -286,7 +288,7 @@ fun PositionEffect(
 }
 
 @Composable
- fun FollowPositionButton(
+fun FollowPositionButton(
     modifier: Modifier = Modifier,
     followingUserPosition: Boolean,
     hasLocationPermission: Boolean,

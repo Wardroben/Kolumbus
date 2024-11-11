@@ -83,6 +83,8 @@ import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.ui.CreationDate
 import ru.smalljinn.ui.KolumbusMap
 import ru.smalljinn.ui.LoadingContent
+import ru.smalljinn.ui.MapConfig
+import ru.smalljinn.ui.MapState
 import ru.smalljinn.ui.ObserveAsEvents
 import ru.smalljinn.ui.RemovablePlaceImages
 import ru.smalljinn.ui.TakeMediaButton
@@ -541,6 +543,34 @@ private fun LazyListScope.placeDetailBody(
     }
     item {
         KolumbusMap(
+            mapState = MapState.PlaceMap(
+                placePosition = placeDetailState.placePosition ?: Position.initialPosition(),
+                onPlacePositionUpdated = onPlacePositionUpdated,
+                canChangePlacePosition = placeDetailState.editable,
+                mapConfig = MapConfig(
+                    userPosition = placeDetailState.userPosition ?: Position.initialPosition(),
+                    usePreciseLocation = permissionState.hasFineLocationAccess,
+                    hasAtLeastOneLocationPermission = permissionState.hasAtLeastOneLocationAccess,
+                    isGpsRequestDenied = isGpsRequestDenied,
+                    onUserPositionUpdated = onUserPositionUpdated,
+                    onGpsUnavailableResolvable = onGpsUnavailableResolvable,
+                    showNoLocationPermissionsRationale = onRequestLocationPermission
+                )
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .padding(horizontal = 16.dp)
+                .motionEventSpy {
+                    if (placeDetailState.editable) {
+                        when (it.action) {
+                            MotionEvent.ACTION_DOWN -> onMapCameraMoving(true)
+                            MotionEvent.ACTION_UP -> onMapCameraMoving(false)
+                        }
+                    }
+                },
+        )
+        /*KolumbusMap(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
@@ -566,7 +596,7 @@ private fun LazyListScope.placeDetailBody(
             showNoLocationPermissionsRationale = onRequestLocationPermission,
             shouldShowPlaceMarker = !placeDetailState.editable,
             shouldShowPlacePositionEditingMarker = placeDetailState.editable
-        )
+        )*/
     }
     item {
         //title
@@ -622,9 +652,11 @@ private fun PlaceToolbar(
     isDataProcessing: Boolean,
     canSave: Boolean
 ) {
-    Box(modifier = modifier
-        .background(MaterialTheme.colorScheme.surface)
-        .padding(top = 8.dp)) {
+    Box(
+        modifier = modifier
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(top = 8.dp)
+    ) {
         AnimatedContent(targetState = isEditing, label = "AnimatedPlaceToolbar") { editing ->
             if (editing) PlaceEditingButtons(
                 cancelEditing = onCancelEditing,

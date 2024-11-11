@@ -6,6 +6,8 @@ data class Position(
 ) {
     val isInit: Boolean
         get() = this == initialPosition()
+    val isCorrect: Boolean
+        get() = !isInit
     companion object {
         fun initialPosition() = Position(0.0,0.0)
     }
