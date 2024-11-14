@@ -18,7 +18,7 @@ androidxNavigation = "2.8.3"
 androidxLifecycle = "2.8.6"
 hilt = "2.52"
 coil = "2.7.0"
-kotlinxSerializationJson = "1.7.3"
+serialization = "1.7.3"
 kotlinxDatetime = "0.6.1"
 jetbrainsKotlinJvm = "2.0.20"
 appcompat = "1.7.0"
@@ -83,7 +83,8 @@ hilt-core = { group = "com.google.dagger", name = "hilt-core", version.ref = "hi
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 hilt-android-testing = { module = "com.google.dagger:hilt-android-testing", version.ref = "hilt" }
 coil = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+kotlinx-serialization-cbor = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-cbor", version.ref = "serialization" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinxDatetime" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "kotlinxCoroutines" }
 

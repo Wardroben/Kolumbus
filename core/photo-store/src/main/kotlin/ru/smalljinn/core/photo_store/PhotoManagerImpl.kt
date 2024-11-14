@@ -15,19 +15,29 @@ private const val TAG = "PhotoManager"
 
 class PhotoManagerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val fileManager: FileManager,
+    private val imageFileManager: ImageFileManager,
     private val imageCompressor: ImageCompressor
 ) : PhotoManager {
-    override suspend fun savePhotosToDevice(uris: List<Uri>): Result<List<Uri>, PhotoError> {
+    override suspend fun savePhotosToDevice(uris: List<Uri>, compress: Boolean): Result<List<Uri>, PhotoError> {
         if (uris.isEmpty()) return Result.Error(PhotoError.EMPTY_URIS)
-        val compressedImageUris = mutableListOf<Uri>()
+        val imageUris = mutableListOf<Uri>()
         uris.forEach { uri ->
             try {
-                when (val result = imageCompressor.compressImage(uri)) {
-                    is Result.Error -> Log.e(TAG, "Error compressing image: ${result.error}")
-                    is Result.Success -> {
-                        val savedFileUri = fileManager.saveImage(result.data)
-                        compressedImageUris.add(savedFileUri)
+                if (compress) {
+                    when (val result = imageCompressor.compressImage(uri)) {
+                        is Result.Error -> Log.e(TAG, "Error compressing image: ${result.error}")
+                        is Result.Success -> {
+                            val savedFileUri = imageFileManager.saveImage(result.data)
+                            imageUris.add(savedFileUri)
+                        }
+                    }
+                } else {
+                    when(val readImageResult = imageFileManager.readImageBytes(uri)) {
+                        is Result.Error -> return Result.Error(readImageResult.error)
+                        is Result.Success -> {
+                            val savedImageUri = imageFileManager.saveImage(readImageResult.data)
+                            imageUris.add(savedImageUri)
+                        }
                     }
                 }
             } catch (e: FileNotFoundException) {
@@ -41,14 +51,14 @@ class PhotoManagerImpl @Inject constructor(
                 return Result.Error(PhotoError.UNKNOWN)
             }
         }
-        return Result.Success(compressedImageUris.toList())
+        return Result.Success(imageUris.toList())
     }
 
     override suspend fun deletePhotoFromDevice(uri: Uri): Result<Unit, PhotoError> {
-        return fileManager.deleteImage(uri)
+        return imageFileManager.deleteImage(uri)
     }
 
-    override suspend fun clearTemporaryImages() = fileManager.clearTempImages()
+    override suspend fun clearTemporaryImages() = imageFileManager.clearTempImages()
 
 
     override fun getUriForTakePhoto(): Uri {

@@ -22,10 +22,15 @@ class ImageCompressor @Inject constructor(
 ) {
     suspend fun compressImage(
         uri: Uri
-    ) : Result<ByteArray, PhotoError> {
+    ): Result<ByteArray, PhotoError> {
         val contentResolver = context.contentResolver
         return withContext(Dispatchers.IO) {
             val mimeType = contentResolver.getType(uri)
+
+            //Check image type
+            if (mimeType == null || !mimeType.startsWith("image"))
+                return@withContext Result.Error(PhotoError.DECODE_FAILED)
+
             val inputBytes = contentResolver.openInputStream(uri)?.use { inputStream ->
                 inputStream.readBytes()
             } ?: return@withContext Result.Error(PhotoError.DECODE_FAILED)
@@ -36,14 +41,7 @@ class ImageCompressor @Inject constructor(
                 val bitmap = BitmapFactory.decodeByteArray(inputBytes, 0, inputBytes.size)
                 val scaledBitmap = scaleImage(bitmap)
 
-                val compressFormat = when(mimeType) {
-                    "image/png" -> Bitmap.CompressFormat.PNG
-                    "image/jpeg" -> Bitmap.CompressFormat.JPEG
-                    "image/webp" -> if (Build.VERSION.SDK_INT >= 30) {
-                        Bitmap.CompressFormat.WEBP_LOSSY
-                    } else Bitmap.CompressFormat.WEBP
-                    else -> Bitmap.CompressFormat.JPEG
-                }
+                val compressFormat = determineCompressFormat(mimeType)
 
                 var outputBytes: ByteArray
 
@@ -55,6 +53,16 @@ class ImageCompressor @Inject constructor(
                 Result.Success(outputBytes)
             }
         }
+    }
+
+    private fun determineCompressFormat(mimeType: String) = when (mimeType) {
+        "image/png" -> Bitmap.CompressFormat.PNG
+        "image/jpeg" -> Bitmap.CompressFormat.JPEG
+        "image/webp" -> if (Build.VERSION.SDK_INT >= 30) {
+            Bitmap.CompressFormat.WEBP_LOSSY
+        } else Bitmap.CompressFormat.WEBP
+
+        else -> Bitmap.CompressFormat.JPEG
     }
 
     /**

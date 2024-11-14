@@ -27,7 +27,7 @@ class OfflinePlacesRepository @Inject constructor(
         val imageUris = place.images.map { it.url.toUri() }
         if (imageUris.isEmpty()) return placeId
         val id = if (placeId == -1L) place.id else placeId
-        imagesRepository.insertImages(imageUris, id)
+        imagesRepository.insertImages(imageUris = imageUris, placeId = id, compress = true)
         return placeId
     }
 

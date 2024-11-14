@@ -22,27 +22,27 @@ class OfflineImagesRepository @Inject constructor(
 ) : ImageRepository {
     override suspend fun insertImages(
         imageUris: List<Uri>,
-        placeId: Long
+        placeId: Long,
+        compress: Boolean
     ): Result<Unit, PhotoError> {
         return withContext(Dispatchers.IO) {
-            when (val compressedImageUrisOnDevice = photoManager.savePhotosToDevice(imageUris)) {
+            when (val imageUrisOnDevice = photoManager.savePhotosToDevice(imageUris, compress)) {
                 is Result.Error -> {
-                    Log.e(TAG, "Images not saved: ${compressedImageUrisOnDevice.error.name}")
-                    return@withContext Result.Error(compressedImageUrisOnDevice.error)
+                    Log.e(TAG, "Images not saved: ${imageUrisOnDevice.error.name}")
+                    return@withContext Result.Error(imageUrisOnDevice.error)
                 }
                 is Result.Success -> {
                     imageDao.insertImages(
-                        compressedImageUrisOnDevice.data.asImageEntities(placeId)
+                        imageUrisOnDevice.data.asImageEntities(placeId)
                     )
                     Log.v(
                         TAG,
-                        "Image successfully inserted: ${compressedImageUrisOnDevice.data.size} count"
+                        "Image successfully inserted: ${imageUrisOnDevice.data.size} count"
                     )
                 }
             }
             Result.Success(Unit)
         }
-
     }
 
     override suspend fun deleteImage(image: Image): Result<Unit, PhotoError> {

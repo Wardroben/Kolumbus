@@ -2,6 +2,7 @@ package ru.smalljinn.core.photo_store
 
 import android.content.Context
 import android.net.Uri
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -11,7 +12,9 @@ import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
 
-class FileManager @Inject constructor(
+private const val TAG = "ImageFileManager"
+
+class ImageFileManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     suspend fun saveImage(bytes: ByteArray): Uri {
@@ -29,6 +32,17 @@ class FileManager @Inject constructor(
         return withContext(Dispatchers.IO) {
             val deletedRows = context.contentResolver.delete(uri, null, null)
             if (deletedRows == 1) Result.Success(Unit) else Result.Error(PhotoError.FILE_NOT_DELETED)
+        }
+    }
+
+    fun readImageBytes(uri: Uri): Result<ByteArray, PhotoError> {
+        return try {
+            context.contentResolver.openInputStream(uri)?.use { stream ->
+                Result.Success(stream.readBytes())
+            } ?: Result.Error(PhotoError.DECODE_FAILED)
+        } catch (e: Exception) {
+            Log.e(TAG, "Error reading image data: ", e)
+            Result.Error(PhotoError.UNKNOWN)
         }
     }
 

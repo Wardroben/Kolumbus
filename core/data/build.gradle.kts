@@ -12,6 +12,7 @@ dependencies {
     implementation(project(":core:database"))
     implementation(project(":core:photo-store"))
     implementation(project(":core:datastore"))
-
+    implementation(project(":core:import_export"))
+    
     androidTestImplementation(libs.kotlinx.coroutines.test)
 }
