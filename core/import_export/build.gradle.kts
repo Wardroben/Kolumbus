@@ -10,5 +10,6 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:domain"))
     implementation(libs.kotlinx.serialization.cbor)
 }

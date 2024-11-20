@@ -2,7 +2,6 @@ package ru.smalljinn.place
 
 import android.Manifest
 import android.app.Activity
-import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.view.MotionEvent
@@ -102,7 +101,7 @@ fun PlaceScreen(
 ) {
     val context = LocalContext.current
 
-    val placeUiState by viewModel.uiState1.collectAsStateWithLifecycle()
+    val placeUiState by viewModel.uiState.collectAsStateWithLifecycle()
     val permissionState by viewModel.permissionState.collectAsStateWithLifecycle()
 
     ObserveAsEvents(viewModel.eventChannel) { event ->
@@ -194,10 +193,7 @@ fun PlaceScreen(
         onGpsUnavailableResolvable = { intentRequest ->
             gpsSettingsLauncher.launch(intentRequest)
         },
-        onShareClick = {
-            val intent = viewModel.createShareIntent()
-            context.startActivity(Intent.createChooser(intent, null))
-        },
+        onShareClick = viewModel::sharePlace,
         onRequestLocationPermission = {
             if (!permissionState.hasAtLeastOneLocationAccess) showDialogForLocationPermission = true
         },

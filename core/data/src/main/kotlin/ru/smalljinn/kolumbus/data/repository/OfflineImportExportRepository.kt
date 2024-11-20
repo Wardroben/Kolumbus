@@ -2,9 +2,9 @@ package ru.smalljinn.kolumbus.data.repository
 
 import android.net.Uri
 import kotlinx.coroutines.flow.first
-import ru.smalljinn.core.photo_store.ImageFileManager
 import ru.smalljinn.import_export.CborConverter
 import ru.smalljinn.import_export.toModel
+import ru.smalljinn.kolumbus.data.image.AndroidImageSaver
 import ru.smalljinn.model.data.Position
 import ru.smalljinn.model.data.response.ExportError
 import ru.smalljinn.model.data.response.ImportError
@@ -14,8 +14,8 @@ import javax.inject.Inject
 class OfflineImportExportRepository @Inject constructor(
     private val cborConverter: CborConverter,
     private val placesRepository: PlacesRepository,
-    private val imageFileManager: ImageFileManager,
-    private val searchPlacesRepository: SearchPlacesRepository
+    private val searchPlacesRepository: SearchPlacesRepository,
+    private val imageSaver: AndroidImageSaver
 ) : ImportExportRepository {
     override suspend fun exportPlaces(
         placeIds: Set<Long>,
@@ -42,14 +42,19 @@ class OfflineImportExportRepository @Inject constructor(
                             .first()
                             .filter { place ->
                                 place.creationDate.toEpochMilliseconds() == cborPlace.timestamp
-                                        && place.position == Position(cborPlace.latitude, cborPlace.longitude)
+                                        && place.position == Position(
+                                    cborPlace.latitude,
+                                    cborPlace.longitude
+                                )
                                         && place.favorite == cborPlace.favorite
                             }
                     //if local db has similar place skip it
                     if (similarPlace.isNotEmpty() && similarPlace.size == 1) continue
 
                     val placeImagesUris =
-                        cborPlace.images.map { byteArray -> imageFileManager.saveImage(byteArray) }
+                        cborPlace.images.map { byteArray ->
+                            imageSaver.saveImageToFilesDir(byteArray)
+                        }
                     placesRepository.upsertPlace(place = cborPlace.toModel(imageUris = placeImagesUris))
                 }
 

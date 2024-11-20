@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 class OfflinePlacesRepository @Inject constructor(
     private val placeDao: PlaceDao,
-    private val imagesRepository: OfflineImagesRepository
+    private val imagesRepository: ImageRepository
 ) : PlacesRepository {
     override fun getPlacesStream(): Flow<List<Place>> {
         return placeDao.getPlacesWithImagesStream().map { it.asModels() }

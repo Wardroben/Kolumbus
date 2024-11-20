@@ -66,7 +66,7 @@ sealed class MapState {
         val mapConfig: MapConfig,
         val placePosition: Position,
         val onPlacePositionUpdated: (Position) -> Unit,
-        val canChangePlacePosition: Boolean
+        val canChangePlacePosition: Boolean,
     ) : MapState()
 
     data class GlobalMap(val mapConfig: MapConfig, val places: List<Place>) : MapState()

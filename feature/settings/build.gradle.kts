@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":core:ui"))
     implementation(project(":core:data"))
     implementation(project(":core:model"))
+    implementation(project(":core:import_export"))
 
 
     implementation(libs.androidx.core.ktx)

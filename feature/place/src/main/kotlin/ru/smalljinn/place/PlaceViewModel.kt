@@ -1,6 +1,5 @@
 package ru.smalljinn.place
 
-import android.content.Intent
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
@@ -17,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import ru.smalljinn.core.photo_store.PhotoManager
+import ru.smalljinn.domain.saving.FileController
+import ru.smalljinn.domain.share.ShareProvider
 import ru.smalljinn.kolumbus.data.repository.ImageRepository
 import ru.smalljinn.kolumbus.data.repository.PlacesRepository
 import ru.smalljinn.model.data.Image
@@ -36,8 +36,9 @@ class PlaceViewModel @Inject constructor(
     private val placesRepository: PlacesRepository,
     private val imagesRepository: ImageRepository,
     private val permissionManager: PermissionManager,
-    private val photoManager: PhotoManager,
     private val savePlaceUseCase: SavePlaceUseCase,
+    private val shareProvider: ShareProvider,
+    private val fileController: FileController
 ) : ViewModel() {
     private val route = savedStateHandle.toRoute<PlaceRoute>()
     private val initialMode = when {
@@ -51,7 +52,7 @@ class PlaceViewModel @Inject constructor(
     val permissionState = permissionManager.state
 
     private val _uiState = MutableStateFlow(PlaceDetailState())
-    internal val uiState1 = _uiState.asStateFlow()
+    internal val uiState = _uiState.asStateFlow()
 
     init {
         if (initialMode is InitialMode.Creation) {
@@ -86,26 +87,26 @@ class PlaceViewModel @Inject constructor(
     private val _deletedImages = mutableListOf<Image>()
 
     fun getPlaceInfoToDelete(): Pair<Long, String> =
-        with(uiState1.value) { Pair(initialPlace.id, title) }
+        with(uiState.value) { Pair(initialPlace.id, title) }
 
 
     fun removeImage(image: Image) {
-        _uiState.update { it.copy(images = uiState1.value.images.minus(image)) }
+        _uiState.update { it.copy(images = uiState.value.images.minus(image)) }
         _deletedImages.add(image)
     }
 
     fun addImage(uri: Uri) {
-        val duplicate = uiState1.value.images.find { it.url == uri.toString() }
+        val duplicate = uiState.value.images.find { it.url == uri.toString() }
         if (duplicate != null) return
         val newImage = Image(id = 0, url = uri.toString())
-        _uiState.update { it.copy(images = uiState1.value.images.plus(newImage)) }
+        _uiState.update { it.copy(images = uiState.value.images.plus(newImage)) }
     }
 
     fun addImages(uris: List<Uri>) {
         if (uris.isEmpty()) return
         val newImages = uris.map { uri -> Image(id = 0, url = uri.toString()) }
 
-        _uiState.update { it.copy(images = uiState1.value.images.plus(newImages)) }
+        _uiState.update { it.copy(images = uiState.value.images.plus(newImages)) }
     }
 
     @JvmName(name = "setPlaceTitle")
@@ -133,7 +134,7 @@ class PlaceViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val placeToInsert =
-                    uiState1.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite)
+                    uiState.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite)
                 val insertPlaceResultId = savePlaceUseCase(
                     place = placeToInsert,
                     imagesToDelete = _deletedImages.toSet()
@@ -170,32 +171,14 @@ class PlaceViewModel @Inject constructor(
         }
         clearTempImages()
     }
-
-    //TODO move to intent manager or something
-    fun createShareIntent(): Intent {
-        with(uiState1.value) {
-            //val imageUris: ArrayList<Uri> = ArrayList(images.map { it.url.toUri() })
-            val headerImageUri =
-                images.find { it.id == headerImageId }?.url?.toUri() ?: images.first().url.toUri()
-            val text = buildString {
-                append(title)
-                if (description.isNotBlank()) append("\n\n$description")
-                if (placePosition != null)
-                    append("\n\nhttps://www.google.com/maps/place/${placePosition.latitude},${placePosition.longitude}")
-            }
-            val shareIntent: Intent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TITLE, "Sharing place")
-                putExtra(Intent.EXTRA_TEXT, text)
-                putExtra(Intent.EXTRA_STREAM, headerImageUri)
-                setDataAndType(headerImageUri, "image/*")
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            return shareIntent
+    fun sharePlace() {
+        viewModelScope.launch {
+            //val place = placesRepository.getPlace(initialPlace)
+            shareProvider.sharePlace(initialPlace)
         }
     }
 
-    fun getUriForPhoto(): Uri = photoManager.getUriForTakePhoto()
+    fun getUriForPhoto(): Uri = fileController.createTemporaryFile().toUri()
 
     fun startEditing() = _uiState.update { it.copy(placeMode = PlaceMode.EDITING) }
 
@@ -208,7 +191,7 @@ class PlaceViewModel @Inject constructor(
         _uiState.update { it.copy(headerImageId = id) }
         viewModelScope.launch {
             savePlaceUseCase(
-                place = uiState1.value.getPlaceToInsert(
+                place = uiState.value.getPlaceToInsert(
                     initialPlace.id,
                     initialPlace.favorite
                 ),
@@ -217,7 +200,8 @@ class PlaceViewModel @Inject constructor(
         }
     }
 
-    private fun clearTempImages() = viewModelScope.launch { photoManager.clearTemporaryImages() }
+    private fun clearTempImages() = viewModelScope.launch { fileController.clearCache() }
+
     private fun setDataProcessing(processing: Boolean) =
         _uiState.update { it.copy(isDataProcessing = processing) }
 
@@ -242,7 +226,6 @@ class PlaceViewModel @Inject constructor(
 }
 
 private const val TAG = "PlaceVM"
-
 
 internal data class PlaceDetailState(
     val title: String = "",

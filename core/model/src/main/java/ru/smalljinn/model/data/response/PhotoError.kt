@@ -6,5 +6,6 @@ enum class PhotoError: Error {
     HAVE_NOT_ACCESS,
     DECODE_FAILED,
     FILE_NOT_DELETED,
+    SOME_IMAGES_NOT_SAVED,
     UNKNOWN
 }
