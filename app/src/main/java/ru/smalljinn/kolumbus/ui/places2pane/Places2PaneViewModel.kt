@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import ru.smalljinn.place.usecase.DeletePlaceUseCase
+import ru.smalljinn.domain.usecase.place.DeletePlaceUseCase
 import ru.smalljinn.places.navigation.PlacesRoute
 import javax.inject.Inject
 

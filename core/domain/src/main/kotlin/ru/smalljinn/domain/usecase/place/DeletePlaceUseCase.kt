@@ -1,10 +1,10 @@
-package ru.smalljinn.place.usecase
+package ru.smalljinn.domain.usecase.place
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.smalljinn.kolumbus.data.repository.ImageRepository
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
+import ru.smalljinn.domain.repository.ImageRepository
+import ru.smalljinn.domain.repository.PlacesRepository
 import javax.inject.Inject
 
 private const val TAG = "DeletePlaceUC"

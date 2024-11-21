@@ -2,6 +2,10 @@ package ru.smalljinn.kolumbus.data.repository
 
 import android.net.Uri
 import kotlinx.coroutines.flow.first
+import ru.smalljinn.domain.repository.ImportExportRepository
+import ru.smalljinn.domain.repository.PlacesRepository
+import ru.smalljinn.domain.repository.SearchPlacesRepository
+import ru.smalljinn.domain.usecase.place.SavePlaceUseCase
 import ru.smalljinn.import_export.CborConverter
 import ru.smalljinn.import_export.toModel
 import ru.smalljinn.kolumbus.data.image.AndroidImageSaver
@@ -15,7 +19,8 @@ class OfflineImportExportRepository @Inject constructor(
     private val cborConverter: CborConverter,
     private val placesRepository: PlacesRepository,
     private val searchPlacesRepository: SearchPlacesRepository,
-    private val imageSaver: AndroidImageSaver
+    private val imageSaver: AndroidImageSaver,
+    private val savePlaceUseCase: SavePlaceUseCase
 ) : ImportExportRepository {
     override suspend fun exportPlaces(
         placeIds: Set<Long>,
@@ -46,16 +51,18 @@ class OfflineImportExportRepository @Inject constructor(
                                     cborPlace.latitude,
                                     cborPlace.longitude
                                 )
-                                        && place.favorite == cborPlace.favorite
                             }
                     //if local db has similar place skip it
                     if (similarPlace.isNotEmpty() && similarPlace.size == 1) continue
 
                     val placeImagesUris =
-                        cborPlace.images.map { byteArray ->
-                            imageSaver.saveImageToFilesDir(byteArray)
-                        }
-                    placesRepository.upsertPlace(place = cborPlace.toModel(imageUris = placeImagesUris))
+                        cborPlace.images.map { byteArray -> imageSaver.saveImageToFilesDir(byteArray) }
+                    savePlaceUseCase(
+                        place = cborPlace.toModel(imageUris = placeImagesUris),
+                        imagesToDelete = emptySet(),
+                        compressImages = false,
+                        isImporting = true
+                    )
                 }
 
                 Result.Success(Unit)

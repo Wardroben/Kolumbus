@@ -12,6 +12,7 @@ import ru.smalljinn.database.dao.PlaceDao
 import ru.smalljinn.database.dao.SearchPlaceDao
 import ru.smalljinn.database.model.asModels
 import ru.smalljinn.database.model.toPlaceFts
+import ru.smalljinn.domain.repository.SearchPlacesRepository
 import ru.smalljinn.model.data.Place
 import javax.inject.Inject
 
@@ -30,7 +31,7 @@ class DefaultSearchPlacesRepository @Inject constructor(
 
     override fun searchPlaces(query: String): Flow<List<Place>> {
         val ftsQuery = query.replace("\"", "\"\"")
-        val placeStringIds: Flow<List<Int>> = searchPlaceDao.searchPlaces("\"*$ftsQuery*\"")
+        val placeStringIds: Flow<List<Int>> = searchPlaceDao.searchPlaces("*$ftsQuery*")
         val placesFlow = placeStringIds
             .mapLatest { stringIds ->
                 stringIds

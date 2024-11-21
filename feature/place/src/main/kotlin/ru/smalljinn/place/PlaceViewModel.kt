@@ -1,7 +1,6 @@
 package ru.smalljinn.place
 
 import android.net.Uri
-import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -16,18 +15,18 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import ru.smalljinn.domain.repository.ImageRepository
+import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.domain.saving.FileController
 import ru.smalljinn.domain.share.ShareProvider
-import ru.smalljinn.kolumbus.data.repository.ImageRepository
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
+import ru.smalljinn.domain.usecase.place.InvalidPlaceException
+import ru.smalljinn.domain.usecase.place.SavePlaceUseCase
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Place
 import ru.smalljinn.model.data.Position
 import ru.smalljinn.model.data.response.PlaceError
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.place.navigation.PlaceRoute
-import ru.smalljinn.place.usecase.InvalidPlaceException
-import ru.smalljinn.place.usecase.SavePlaceUseCase
 import javax.inject.Inject
 
 @HiltViewModel
@@ -137,7 +136,9 @@ class PlaceViewModel @Inject constructor(
                     uiState.value.getPlaceToInsert(initialPlace.id, initialPlace.favorite)
                 val insertPlaceResultId = savePlaceUseCase(
                     place = placeToInsert,
-                    imagesToDelete = _deletedImages.toSet()
+                    imagesToDelete = _deletedImages.toSet(),
+                    compressImages = true,
+                    isImporting = false
                 )
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
@@ -153,7 +154,7 @@ class PlaceViewModel @Inject constructor(
                 _uiState.update { it.copy(images = newImages) }
             } catch (e: InvalidPlaceException) {
                 isCanceled = true
-                _eventChannel.send(PlaceUiEvent.ShowMessage(e.messageId))
+                _eventChannel.send(PlaceUiEvent.ShowMessage(message = e.message  ?: "Unknown error"))
             }
         }.invokeOnCompletion {
             clearTempImages()
@@ -188,6 +189,8 @@ class PlaceViewModel @Inject constructor(
 
     fun setHeaderImage(id: Long) {
         if (id == 0L) return
+        if (uiState.value.headerImageId == id) return
+
         _uiState.update { it.copy(headerImageId = id) }
         viewModelScope.launch {
             savePlaceUseCase(
@@ -195,7 +198,9 @@ class PlaceViewModel @Inject constructor(
                     initialPlace.id,
                     initialPlace.favorite
                 ),
-                imagesToDelete = emptySet()
+                imagesToDelete = emptySet(),
+                 compressImages = false,
+                isImporting = false
             )
         }
     }
@@ -260,7 +265,7 @@ internal enum class PlaceMode {
 }
 
 internal sealed interface PlaceUiEvent {
-    data class ShowMessage(@StringRes val messageId: Int) : PlaceUiEvent
+    data class ShowMessage(val message: String) : PlaceUiEvent
     data object NavigateBack : PlaceUiEvent
 }
 

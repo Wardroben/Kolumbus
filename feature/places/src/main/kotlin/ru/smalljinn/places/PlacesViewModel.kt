@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
+import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.kolumbus.data.repository.UserSettingsRepository
 import ru.smalljinn.kolumbus.data.util.SyncManager
 import ru.smalljinn.model.data.Place

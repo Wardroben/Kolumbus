@@ -1,4 +1,4 @@
-package ru.smalljinn.kolumbus.data.repository
+package ru.smalljinn.domain.repository
 
 import android.net.Uri
 import ru.smalljinn.model.data.response.ExportError

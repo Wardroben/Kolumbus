@@ -1,12 +1,17 @@
-package ru.smalljinn.kolumbus.data.repository
+package ru.smalljinn.domain.repository
 
-import android.net.Uri
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.response.PhotoError
 import ru.smalljinn.model.data.response.Result
 
 interface ImageRepository {
-    suspend fun insertImages(imageUris: List<Uri>, placeId: Long, compress: Boolean): Result<Unit, PhotoError>
+    suspend fun insertImages(
+        imagesUri: List<String>,
+        placeId: Long,
+        compress: Boolean,
+        imageFilesAlreadyExists: Boolean
+    ): Result<Unit, PhotoError>
+
     suspend fun deleteImage(image: Image): Result<Unit, PhotoError>
     suspend fun getPlaceImages(placeId: Long): List<Image>
 }

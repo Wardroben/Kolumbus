@@ -1,19 +1,17 @@
 package ru.smalljinn.kolumbus.data.repository
 
-import androidx.core.net.toUri
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import ru.smalljinn.database.dao.PlaceDao
 import ru.smalljinn.database.model.asModel
 import ru.smalljinn.database.model.asModels
+import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.kolumbus.data.model.asEntity
 import ru.smalljinn.model.data.Place
 import javax.inject.Inject
 
-class OfflinePlacesRepository @Inject constructor(
-    private val placeDao: PlaceDao,
-    private val imagesRepository: ImageRepository
-) : PlacesRepository {
+class OfflinePlacesRepository @Inject constructor(private val placeDao: PlaceDao) :
+    PlacesRepository {
     override fun getPlacesStream(): Flow<List<Place>> {
         return placeDao.getPlacesWithImagesStream().map { it.asModels() }
     }
@@ -24,10 +22,10 @@ class OfflinePlacesRepository @Inject constructor(
 
     override suspend fun upsertPlace(place: Place): Long {
         val placeId = placeDao.upsertPlace(place.asEntity())
-        val imageUris = place.images.map { it.url.toUri() }
+        /*val imageUris = place.images.map { it.url.toUri() }
         if (imageUris.isEmpty()) return placeId
         val id = if (placeId == -1L) place.id else placeId
-        imagesRepository.insertImages(imageUris = imageUris, placeId = id, compress = true)
+        imagesRepository.insertImages(imageUris = imageUris, placeId = id, compress = true)*/
         return placeId
     }
 

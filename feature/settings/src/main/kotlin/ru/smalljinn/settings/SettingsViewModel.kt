@@ -9,8 +9,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ru.smalljinn.kolumbus.data.repository.ImportExportRepository
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
+import ru.smalljinn.domain.repository.ImportExportRepository
+import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.kolumbus.data.repository.UserSettingsRepository
 import javax.inject.Inject
 

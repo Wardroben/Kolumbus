@@ -8,9 +8,10 @@ android {
 }
 
 dependencies {
+    implementation(project(":core:domain"))
     ksp(libs.hilt.ext.compiler)
 
+    implementation(project(":core:data"))
     implementation(libs.androidx.work.ktx)
     implementation(libs.hilt.ext.work)
-    implementation(project(":core:data"))
 }

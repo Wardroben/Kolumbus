@@ -15,7 +15,7 @@ class ImageFileProvider : FileProvider(R.xml.file_paths) {
     companion object {
         fun getUriForFile(file: File, context: Context) =
             getUriForFile(context, AUTHORITY, file)
-
+        fun getTemporaryDirectory(context: Context) = File(context.cacheDir, TEMPORARY_IMAGES_PATH_NAME)
         fun createTemporaryFileForImage(context: Context): File {
             //require(checkOrCreateImageDir(context, TEMPORARY_IMAGES_PATH_NAME))
             val timeMillis = Clock.System.now().toEpochMilliseconds()

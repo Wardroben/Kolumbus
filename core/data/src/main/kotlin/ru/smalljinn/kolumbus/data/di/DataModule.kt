@@ -4,14 +4,14 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import ru.smalljinn.domain.repository.ImageRepository
+import ru.smalljinn.domain.repository.ImportExportRepository
+import ru.smalljinn.domain.repository.PlacesRepository
+import ru.smalljinn.domain.repository.SearchPlacesRepository
 import ru.smalljinn.kolumbus.data.repository.DefaultSearchPlacesRepository
-import ru.smalljinn.kolumbus.data.repository.ImageRepository
-import ru.smalljinn.kolumbus.data.repository.ImportExportRepository
 import ru.smalljinn.kolumbus.data.repository.OfflineImagesRepository
 import ru.smalljinn.kolumbus.data.repository.OfflineImportExportRepository
 import ru.smalljinn.kolumbus.data.repository.OfflinePlacesRepository
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
-import ru.smalljinn.kolumbus.data.repository.SearchPlacesRepository
 
 @Module
 @InstallIn(SingletonComponent::class)

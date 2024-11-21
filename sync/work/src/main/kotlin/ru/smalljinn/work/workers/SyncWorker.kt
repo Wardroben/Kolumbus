@@ -10,7 +10,7 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import ru.smalljinn.kolumbus.data.repository.SearchPlacesRepository
+import ru.smalljinn.domain.repository.SearchPlacesRepository
 
 @HiltWorker
 internal class SyncWorker @AssistedInject constructor(

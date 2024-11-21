@@ -96,7 +96,7 @@ fun PlaceScreen(
     showBackButton: Boolean,
     onBackClick: () -> Unit,
     onPlaceDelete: (placeId: Long, title: String) -> Unit,
-    onShowMessage: (Int) -> Unit,
+    onShowMessage: (String) -> Unit,
     viewModel: PlaceViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -106,7 +106,7 @@ fun PlaceScreen(
 
     ObserveAsEvents(viewModel.eventChannel) { event ->
         when (event) {
-            is PlaceUiEvent.ShowMessage -> onShowMessage(event.messageId)
+            is PlaceUiEvent.ShowMessage -> onShowMessage(event.message)
             PlaceUiEvent.NavigateBack -> onBackClick()
         }
     }

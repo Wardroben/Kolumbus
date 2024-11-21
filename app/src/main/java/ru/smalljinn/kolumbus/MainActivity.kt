@@ -48,10 +48,10 @@ class MainActivity : ComponentActivity() {
                         //Spacer(Modifier.windowInsetsTopHeight(WindowInsets.safeDrawing))
                         KolumbusNavHost(
                             appState = appState,
-                            onShowMessage = { messageId: Int ->
+                            onShowMessage = { message: String ->
                                 appState.coroutineScope.launch {
                                     appState.snackbarHostState.showSnackbar(
-                                        message = context.getString(messageId)
+                                        message = message
                                     )
                                 }
                             }

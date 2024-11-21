@@ -2,11 +2,13 @@ package ru.smalljinn.kolumbus.data.repository
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.core.net.toUri
 import ru.smalljinn.database.dao.ImageDao
 import ru.smalljinn.database.model.ImageEntity
 import ru.smalljinn.database.model.asModel
 import ru.smalljinn.domain.image.ImageCompressor
 import ru.smalljinn.domain.image.ImageGetter
+import ru.smalljinn.domain.repository.ImageRepository
 import ru.smalljinn.domain.saving.FileController
 import ru.smalljinn.kolumbus.data.image.AndroidImageSaver
 import ru.smalljinn.model.data.Image
@@ -22,11 +24,19 @@ class OfflineImagesRepository @Inject constructor(
     private val imageDao: ImageDao
 ) : ImageRepository {
     override suspend fun insertImages(
-        imageUris: List<Uri>,
+        imagesUri: List<String>,
         placeId: Long,
-        compress: Boolean
+        compress: Boolean,
+        imageFilesAlreadyExists: Boolean
     ): Result<Unit, PhotoError> {
-        val saveImagesResult = imageUris.map { uri: Uri -> saveImage(uri, compress) }
+        //Если изображения уже в папке приложения (в случае импорта), то добавить записи в БД
+        if (imageFilesAlreadyExists) {
+            imageDao.insertImages(imagesUri.map { ImageEntity(0, it, placeId) })
+            return Result.Success(Unit)
+        }
+
+        //В ином случае читаем изображения по Uri, сохраняем в filesDir и добавляем в БД
+        val saveImagesResult = imagesUri.map { uri: String -> saveImage(uri.toUri(), compress) }
 
         val imagesToAdd = saveImagesResult
             .filterIsInstance<Result.Success<Uri, PhotoError>>() //filter success

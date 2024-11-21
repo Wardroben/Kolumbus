@@ -1,4 +1,4 @@
-package ru.smalljinn.kolumbus.data.repository
+package ru.smalljinn.domain.repository
 
 import kotlinx.coroutines.flow.Flow
 import ru.smalljinn.model.data.Place

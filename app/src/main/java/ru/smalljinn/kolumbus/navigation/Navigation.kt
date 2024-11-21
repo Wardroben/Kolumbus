@@ -13,7 +13,7 @@ import ru.smalljinn.search.navigation.searchScreen
 @Composable
 fun KolumbusNavHost(
     appState: KolumbusAppState,
-    onShowMessage: (Int) -> Unit,
+    onShowMessage: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val navController = appState.navController

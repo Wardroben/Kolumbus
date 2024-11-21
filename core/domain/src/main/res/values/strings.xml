@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="empty_title_exception">Title can not be empty</string>
+    <string name="invalid_position_exception">Position invalid</string>
+</resources>

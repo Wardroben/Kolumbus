@@ -13,8 +13,6 @@ data class CborPlaceModel(
     val description: String,
     val latitude: Double,
     val longitude: Double,
-    val favorite: Boolean,
-    val headerImageId: Long?,
     val timestamp: Long,
     val images: List<ByteArray>
 )
@@ -28,9 +26,9 @@ fun CborPlaceModel.toModel(imageUris: List<Uri>) = Place(
     id = 0,
     title = title,
     description = description,
-    favorite = favorite,
     position = Position(latitude, longitude),
-    headerImageId = headerImageId,
+    favorite = false,
+    headerImageId = null,
     creationDate = Instant.fromEpochMilliseconds(timestamp),
     images = imageUris.map { uri -> Image(id = 0, url = uri.toString()) }
 )
@@ -40,8 +38,6 @@ internal fun Place.toCbor(imagesByte: List<ByteArray>) = CborPlaceModel(
     description = description,
     latitude = position.latitude,
     longitude = position.longitude,
-    favorite = favorite,
-    headerImageId = headerImageId,
     timestamp = creationDate.toEpochMilliseconds(),
     images = imagesByte
 )
