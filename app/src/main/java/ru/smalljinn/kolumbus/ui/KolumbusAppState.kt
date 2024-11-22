@@ -17,7 +17,7 @@ import ru.smalljinn.kolumbus.navigation.TopLevelDestination
 fun rememberKolumbusAppState(
     navController: NavHostController = rememberNavController(),
     snackbarHostState: SnackbarHostState = SnackbarHostState(),
-    coroutineScope: CoroutineScope = rememberCoroutineScope()
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
 ): KolumbusAppState {
     return remember(navController, snackbarHostState, coroutineScope) {
         KolumbusAppState(

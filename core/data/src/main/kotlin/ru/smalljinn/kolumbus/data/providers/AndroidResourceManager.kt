@@ -11,4 +11,8 @@ class AndroidResourceManager @Inject constructor(
     override fun getString(id: Int): String {
         return context.getString(id)
     }
+
+    override fun getString(id: Int, vararg formatArgs: Any): String {
+        return context.getString(id, *formatArgs)
+    }
 }

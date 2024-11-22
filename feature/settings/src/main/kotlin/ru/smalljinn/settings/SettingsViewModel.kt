@@ -17,7 +17,7 @@ import javax.inject.Inject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userSettingsRepository: UserSettingsRepository,
-    private val exportRepository: ImportExportRepository,
+    private val importExportRepository: ImportExportRepository,
     private val placesRepository: PlacesRepository
 ) : ViewModel() {
     val uiState = userSettingsRepository.settings.map {
@@ -40,7 +40,7 @@ class SettingsViewModel @Inject constructor(
 
     fun importBackup(uri: Uri) {
         viewModelScope.launch {
-            exportRepository.importPlaces(uri)
+            importExportRepository.importPlaces(uri)
         }
     }
 
@@ -49,7 +49,7 @@ class SettingsViewModel @Inject constructor(
             val allPlacesIds = placesRepository.getPlacesStream().first()
                 .map { it.id }
                 .toSet()
-            exportRepository.exportPlaces(fileUri = uri, placeIds = allPlacesIds)
+            importExportRepository.exportPlaces(fileUri = uri, placeIds = allPlacesIds)
         }
     }
 }

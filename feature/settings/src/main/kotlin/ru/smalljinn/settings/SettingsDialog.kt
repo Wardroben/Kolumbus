@@ -121,9 +121,9 @@ private fun ColumnScope.SettingsPanel(
             selected = settings.useCompactStyle
         ) { onChangeCardStyle(true) }
     }
-    SettingSectionTitle("Places backup")
-    BackupButtonRow(text = "Export backup as file", isExport = true) { onCreateBackupClicked() }
-    BackupButtonRow(text = "Import backup as file", isExport = false) { onImportBackupClicked() }
+    SettingSectionTitle(stringResource(R.string.places_backup_setting))
+    BackupButtonRow(text = stringResource(R.string.export_backup_as_file), isExport = true) { onCreateBackupClicked() }
+    BackupButtonRow(text = stringResource(R.string.import_backup_from_file), isExport = false) { onImportBackupClicked() }
 }
 
 @Composable
@@ -157,11 +157,11 @@ private fun BackupButtonRow(
         Row(Modifier.padding(12.dp)) {
             if (isExport) Icon(
                 painter = painterResource(R.drawable.baseline_upload_24),
-                contentDescription = "Export backup"
+                contentDescription = stringResource(R.string.export_backup_as_file)
             )
             else Icon(
                 painter = painterResource(R.drawable.baseline_download_24),
-                contentDescription = "Import backup"
+                contentDescription = stringResource(R.string.import_backup_from_file)
             )
             Spacer(Modifier.width(12.dp))
             Text(text)

@@ -2,6 +2,7 @@ package ru.smalljinn.kolumbus.data.repository
 
 import android.net.Uri
 import kotlinx.coroutines.flow.first
+import ru.smalljinn.domain.backup.BackupMessageProvider
 import ru.smalljinn.domain.repository.ImportExportRepository
 import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.domain.repository.SearchPlacesRepository
@@ -16,6 +17,7 @@ import ru.smalljinn.model.data.response.Result
 import javax.inject.Inject
 
 class OfflineImportExportRepository @Inject constructor(
+    private val backupMessageProvider: BackupMessageProvider,
     private val cborConverter: CborConverter,
     private val placesRepository: PlacesRepository,
     private val searchPlacesRepository: SearchPlacesRepository,
@@ -34,12 +36,16 @@ class OfflineImportExportRepository @Inject constructor(
         else Result.Error(ExportError.FILE_NOT_CREATED)
     }
 
-    override suspend fun importPlaces(fileUri: Uri): Result<Unit, ImportError> {
-        //TODO("duplicates checking")
+    override suspend fun importPlaces(fileUri: Uri): Result<Int, ImportError> {
         return when (val importResult = cborConverter.importBackupFile(fileUri)) {
-            is Result.Error -> Result.Error(importResult.error)
+            is Result.Error -> {
+                backupMessageProvider.showErrorMessage(importResult.error)
+                Result.Error(importResult.error)
+            }
             is Result.Success -> {
                 val cborPlaces = importResult.data
+                var importedPlacesCount = 0
+                var skippedPlacesCount = 0
                 for (cborPlace in cborPlaces) {
                     val similarPlace =
                         searchPlacesRepository
@@ -53,7 +59,10 @@ class OfflineImportExportRepository @Inject constructor(
                                 )
                             }
                     //if local db has similar place skip it
-                    if (similarPlace.isNotEmpty() && similarPlace.size == 1) continue
+                    if (similarPlace.isNotEmpty() && similarPlace.size == 1) {
+                        skippedPlacesCount++
+                        continue
+                    }
 
                     val placeImagesUris =
                         cborPlace.images.map { byteArray -> imageSaver.saveImageToFilesDir(byteArray) }
@@ -63,9 +72,10 @@ class OfflineImportExportRepository @Inject constructor(
                         compressImages = false,
                         isImporting = true
                     )
+                    importedPlacesCount++
                 }
-
-                Result.Success(Unit)
+                backupMessageProvider.showSuccessMessage(importedPlacesCount, skippedPlacesCount)
+                Result.Success(importedPlacesCount)
             }
         }
     }

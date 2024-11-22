@@ -7,5 +7,5 @@ import ru.smalljinn.model.data.response.Result
 
 interface ImportExportRepository {
     suspend fun exportPlaces(placeIds: Set<Long>, fileUri: Uri): Result<Unit, ExportError>
-    suspend fun importPlaces(fileUri: Uri): Result<Unit, ImportError>
+    suspend fun importPlaces(fileUri: Uri): Result<Int, ImportError>
 }
