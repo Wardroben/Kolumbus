@@ -33,6 +33,17 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <action android:name="android.intent.action.VIEW"/>
+
+                <data android:scheme="content"
+                    tools:ignore="AppLinkUrlError"/>
+                <data android:mimeType="application/octet-stream" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
         </activity>
 
         <meta-data android:name="com.google.android.geo.API_KEY"

@@ -2,4 +2,9 @@
 <resources>
     <string name="empty_title_exception">Title can not be empty</string>
     <string name="invalid_position_exception">Position invalid</string>
+
+    <string name="import_success">Places successfully imported</string>
+    <string name="not_backup_file_import_error">Import error: not a backup file.</string>
+    <string name="file_not_found_import_error">Import error: file not found.</string>
+    <string name="unknown_import_error">Unknown import error.</string>
 </resources>
