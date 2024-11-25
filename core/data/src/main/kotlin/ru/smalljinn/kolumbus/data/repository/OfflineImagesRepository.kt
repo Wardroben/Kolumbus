@@ -5,7 +5,6 @@ import android.net.Uri
 import androidx.core.net.toUri
 import ru.smalljinn.database.dao.ImageDao
 import ru.smalljinn.database.model.ImageEntity
-import ru.smalljinn.database.model.asModel
 import ru.smalljinn.domain.image.ImageCompressor
 import ru.smalljinn.domain.image.ImageGetter
 import ru.smalljinn.domain.repository.ImageRepository
@@ -76,8 +75,5 @@ class OfflineImagesRepository @Inject constructor(
             is Result.Success -> Result.Success(Unit)
         }
     }
-
-    override suspend fun getPlaceImages(placeId: Long): List<Image> =
-        imageDao.getPlaceImages(placeId).map { it.asModel() }
 
 }

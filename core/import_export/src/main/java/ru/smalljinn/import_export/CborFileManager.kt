@@ -14,9 +14,7 @@ import ru.smalljinn.model.data.response.ImportError
 import ru.smalljinn.model.data.response.Result
 import javax.inject.Inject
 
-private const val TAG = "CborConverter"
-
-class CborConverter @Inject constructor(
+class CborFileManager @Inject constructor(
     private val fileController: FileController
 ) {
     /**

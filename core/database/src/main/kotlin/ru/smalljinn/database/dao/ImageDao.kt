@@ -15,12 +15,4 @@ interface ImageDao {
         WHERE image_id LIKE :imageId
     """)
     suspend fun deleteImageById(imageId: Long)
-
-    @Query(
-        """
-            SELECT * FROM images
-            WHERE place_id LIKE :placeId
-        """
-    )
-    suspend fun getPlaceImages(placeId: Long): List<ImageEntity>
 }

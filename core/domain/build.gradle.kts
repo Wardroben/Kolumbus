@@ -9,4 +9,6 @@ android {
 
 dependencies {
     implementation(project(":core:model"))
+    testImplementation(libs.junit.junit)
+    testImplementation(libs.junit.junit)
 }

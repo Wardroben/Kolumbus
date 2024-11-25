@@ -6,13 +6,11 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import ru.smalljinn.domain.repository.ImportExportRepository
-import ru.smalljinn.domain.resource.ResourceManager
 import javax.inject.Inject
 
 @HiltViewModel
 class RootComponent @Inject constructor(
     private val importExportRepository: ImportExportRepository,
-    private val resourceManager: ResourceManager,
 ): ViewModel() {
     /*private val _uiEvent = Channel<ImportUiEvent>()
     val uiEvent = _uiEvent.receiveAsFlow()*/

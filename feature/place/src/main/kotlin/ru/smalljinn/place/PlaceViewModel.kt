@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
-import ru.smalljinn.domain.repository.ImageRepository
 import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.domain.saving.FileController
 import ru.smalljinn.domain.share.ShareProvider
@@ -33,7 +32,6 @@ import javax.inject.Inject
 class PlaceViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
-    private val imagesRepository: ImageRepository,
     private val permissionManager: PermissionManager,
     private val savePlaceUseCase: SavePlaceUseCase,
     private val shareProvider: ShareProvider,
@@ -142,7 +140,7 @@ class PlaceViewModel @Inject constructor(
                 )
                 if (insertPlaceResultId != -1L && initialPlace.id == Place.CREATION_ID)
                     initialPlace = initialPlace.copy(id = insertPlaceResultId)
-                val newImages = imagesRepository.getPlaceImages(initialPlace.id)
+                val newImages = placesRepository.getPlaceImages(placeId = initialPlace.id)
                 initialPlace =
                     initialPlace.copy(
                         images = newImages,

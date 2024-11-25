@@ -1,6 +1,7 @@
 package ru.smalljinn.domain.repository
 
 import kotlinx.coroutines.flow.Flow
+import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Place
 
 interface PlacesRepository {
@@ -10,4 +11,5 @@ interface PlacesRepository {
     suspend fun deletePlace(place: Place)
     suspend fun deletePlaceById(placeId: Long)
     suspend fun makePlaceFavorite(placeId: Long, favorite: Boolean)
+    suspend fun getPlaceImages(placeId: Long): List<Image>
 }

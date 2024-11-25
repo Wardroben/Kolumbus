@@ -7,11 +7,7 @@ import javax.inject.Inject
 
 class AndroidResourceManager @Inject constructor(
     @ApplicationContext private val context: Context
-): ResourceManager{
-    override fun getString(id: Int): String {
-        return context.getString(id)
-    }
-
+): ResourceManager {
     override fun getString(id: Int, vararg formatArgs: Any): String {
         return context.getString(id, *formatArgs)
     }

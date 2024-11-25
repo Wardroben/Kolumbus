@@ -1,6 +1,5 @@
 package ru.smalljinn.domain.usecase.place
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import ru.smalljinn.domain.repository.ImageRepository
@@ -15,12 +14,11 @@ class DeletePlaceUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(placeId: Long) {
         withContext(Dispatchers.IO) {
-            val placeImages = imageRepository.getPlaceImages(placeId)
-            if (placeImages.isNotEmpty()) placeImages.forEach { image ->
+            val place = placesRepository.getPlace(placeId)
+            if (place.images.isNotEmpty()) place.images.forEach { image ->
                 imageRepository.deleteImage(image)
             }
             placesRepository.deletePlaceById(placeId)
         }
-        Log.v(TAG, "Place with $placeId id deleted")
     }
 }

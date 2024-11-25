@@ -13,5 +13,4 @@ interface ImageRepository {
     ): Result<Unit, PhotoError>
 
     suspend fun deleteImage(image: Image): Result<Unit, PhotoError>
-    suspend fun getPlaceImages(placeId: Long): List<Image>
 }
