@@ -80,16 +80,16 @@ import ru.smalljinn.permissions.CameraPermissionTextProvider
 import ru.smalljinn.permissions.LocationPermissionTextProvider
 import ru.smalljinn.permissions.PermissionManager
 import ru.smalljinn.ui.CreationDate
-import ru.smalljinn.ui.KolumbusMap
 import ru.smalljinn.ui.LoadingContent
-import ru.smalljinn.ui.MapConfig
-import ru.smalljinn.ui.MapState
 import ru.smalljinn.ui.ObserveAsEvents
 import ru.smalljinn.ui.RemovablePlaceImages
 import ru.smalljinn.ui.TakeMediaButton
 import ru.smalljinn.ui.TransparentTextField
 import ru.smalljinn.ui.dialogs.BackConfirmationDialog
 import ru.smalljinn.ui.dialogs.PermissionExplanationDialog
+import ru.smalljinn.ui.map.KolumbusMap
+import ru.smalljinn.ui.map.MapConfig
+import ru.smalljinn.ui.map.MapState
 
 @Composable
 fun PlaceScreen(

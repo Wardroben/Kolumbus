@@ -13,4 +13,5 @@
     <string name="cancel_editing_title">Cancel changes</string>
     <string name="cancel_editing_text">All unsaved data will be lost. Cancel changes?</string>
     <string name="delete_action">Delete</string>
+    <string name="change_map_layer_cd">Change map layer</string>
 </resources>
