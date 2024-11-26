@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ru.smalljinn.kolumbus.data.repository.PlacesRepository
-import ru.smalljinn.kolumbus.data.repository.SearchPlacesRepository
+import ru.smalljinn.domain.repository.PlacesRepository
+import ru.smalljinn.domain.repository.SearchPlacesRepository
 import ru.smalljinn.model.data.Place
 import javax.inject.Inject
 

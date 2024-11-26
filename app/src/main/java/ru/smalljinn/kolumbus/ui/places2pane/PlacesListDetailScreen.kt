@@ -57,7 +57,7 @@ internal object PlacePlaceholderRoute
 internal object DetailPaneNavHostRoute
 
 fun NavGraphBuilder.placesListDetailScreen(
-    onShowMessage: (Int) -> Unit,
+    onShowMessage: (String) -> Unit,
     onSearchClicked: () -> Unit,
 ) {
     composable<PlacesRoute> {
@@ -72,7 +72,7 @@ fun NavGraphBuilder.placesListDetailScreen(
 internal fun PlacesListDetailScreen(
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
     viewModel: Places2PaneViewModel = hiltViewModel(),
-    onShowMessage: (Int) -> Unit,
+    onShowMessage: (String) -> Unit,
     onSearchClicked: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -105,7 +105,7 @@ fun PlacesListDetailScreen(
     setPlaceToDelete: (placeId: Long, title: String) -> Unit,
     onDeleteDismiss: () -> Unit,
     onPlaceDeletionConfirmed: () -> Unit,
-    onShowMessage: (Int) -> Unit,
+    onShowMessage: (String) -> Unit,
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo

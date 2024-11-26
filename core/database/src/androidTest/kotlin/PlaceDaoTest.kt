@@ -74,7 +74,7 @@ class PlaceDaoTest {
         )
         imageDao.insertImages(placeImageEntities)
 
-        val placeImages = imageDao.getPlaceImages(placeEntityWithImages.id)
+        val placeImages = placeDao.getPlaceImages(placeEntityWithImages.id)
         val placeImagesCount = placeImageEntities.filter { it.placeId == placeEntityWithImages.id }.size
         assertEquals(placeImagesCount, placeImages.size)
     }

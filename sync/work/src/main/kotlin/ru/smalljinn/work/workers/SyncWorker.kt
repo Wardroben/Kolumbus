@@ -8,17 +8,20 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
-import ru.smalljinn.kolumbus.data.repository.SearchPlacesRepository
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
+import ru.smalljinn.domain.repository.SearchPlacesRepository
 
 @HiltWorker
 internal class SyncWorker @AssistedInject constructor(
     @Assisted private val appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val searchPlacesRepository: SearchPlacesRepository
+    private val searchPlacesRepository: SearchPlacesRepository,
+    @Dispatcher(KolumbusDispatcher.IO) private val ioDispatcher: CoroutineDispatcher
 ) : CoroutineWorker(appContext, workerParams) {
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
+    override suspend fun doWork(): Result = withContext(ioDispatcher) {
         try {
             searchPlacesRepository.populateFtsData()
             Result.success()

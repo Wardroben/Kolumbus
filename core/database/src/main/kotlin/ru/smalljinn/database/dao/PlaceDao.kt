@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
+import ru.smalljinn.database.model.ImageEntity
 import ru.smalljinn.database.model.PlaceEntity
 import ru.smalljinn.database.model.PlaceWithImages
 
@@ -66,4 +67,11 @@ interface PlaceDao {
     )
     suspend fun makeFavoritePlace(placeId: Long, favorite: Boolean)
 
+    @Query(
+        """
+            SELECT * FROM images
+            WHERE place_id LIKE :placeId
+        """
+    )
+    suspend fun getPlaceImages(placeId: Long): List<ImageEntity>
 }

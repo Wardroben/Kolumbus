@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
+      <module name="Kolumbus.core.export_import" target="21" />
+      <module name="Kolumbus.core.photo-store" target="21" />
       <module name="Kolumbus.feature.edit" target="21" />
     </bytecodeTargetLevel>
   </component>
