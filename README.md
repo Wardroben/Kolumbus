@@ -6,10 +6,10 @@ Make notes about current locations and share them. Write a description, pinpoint
 <img src="https://github.com/user-attachments/assets/800401c5-549a-479c-a09d-57b2cdd2e952" width=256px/>
 
 # Roadmap
-- Add screen with favorite places - completed;
+- Add screen with favorite places - **completed**;
 - Add a screen with all labels as small images that you can navigate to the note view;
 - Implement marker clustering on the map screen
-- Implement backup
+- Implement backup - **completed**
 # Technologies and libraries used
 - Coil
 - Google Map Compose (gms location, secrets)
