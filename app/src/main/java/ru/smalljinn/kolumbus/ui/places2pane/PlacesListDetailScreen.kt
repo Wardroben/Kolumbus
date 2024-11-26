@@ -120,7 +120,10 @@ fun PlacesListDetailScreen(
         )
     )
 
-    BackHandler(listDetailNavigator.canNavigateBack()) { listDetailNavigator.navigateBack() }
+    //TODO if it screen opened after search in compact mode navigate back by system
+    BackHandler(listDetailNavigator.canNavigateBack()) {
+        listDetailNavigator.navigateBack()
+    }
 
     var nestedNavHostStartRoute by remember {
         val route =
@@ -133,6 +136,7 @@ fun PlacesListDetailScreen(
     val nestedNavController = key(nestedNavKey) { rememberNavController() }
 
     fun onPlaceClickShowDetailPane(placeId: Long, isCreating: Boolean = false) {
+        if (placeId == selectedPlaceId) return
         onPlaceClick(placeId)
         if (listDetailNavigator.isDetailPaneVisible()) {
             nestedNavController.navigateToPlace(placeId, isCreating) {
@@ -146,12 +150,14 @@ fun PlacesListDetailScreen(
     }
 
     fun onPlaceDelete() {
-        onPlaceDeletionConfirmed()
-        if (!listDetailNavigator.isDetailPaneVisible()) {
+        if (listDetailNavigator.isDetailPaneVisible() && listDetailNavigator.isListPaneVisible()) {
+            nestedNavController.navigate(PlacePlaceholderRoute) {
+                popUpTo<DetailPaneNavHostRoute>()
+            }
+        } else {
             listDetailNavigator.navigateBack()
         }
-        listDetailNavigator.navigateTo(ListDetailPaneScaffoldRole.List)
-        nestedNavController.navigate(PlacePlaceholderRoute)
+        onPlaceDeletionConfirmed()
     }
 
     ListDetailPaneScaffold(

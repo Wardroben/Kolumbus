@@ -33,6 +33,7 @@ import ru.smalljinn.ui.EmptyPlacesContent
 import ru.smalljinn.ui.LoadingContent
 import ru.smalljinn.ui.PlacesTabContent
 import ru.smalljinn.ui.PlacesUiState
+import ru.smalljinn.ui.utils.pickers.rememberFilePicker
 
 
 @Composable
@@ -45,6 +46,10 @@ fun PlacesRoute(
     viewmodel: PlacesViewModel = hiltViewModel()
 ) {
     val placesState by viewmodel.placesState.collectAsStateWithLifecycle()
+
+    val backupFilePicker = rememberFilePicker { uri ->
+        viewmodel.obtainEvent(PlaceEvent.ImportBackup(uri))
+    }
 
     PlacesScreen(
         uiState = placesState,
@@ -61,6 +66,7 @@ fun PlacesRoute(
         onFavoriteClicked = { onlyFavorite ->
             viewmodel.obtainEvent(PlaceEvent.DisplayFavorite(onlyFavorite))
         },
+        onImportBackupClicked = { backupFilePicker.pickFile() },
         modifier = modifier
     )
 }
@@ -74,11 +80,12 @@ fun PlacesScreen(
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
     onFavoriteClicked: (Boolean) -> Unit,
+    onImportBackupClicked: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (uiState) {
         PlacesUiState.Empty -> {
-            EmptyPlacesContent(modifier)
+            EmptyPlacesContent(modifier = modifier, onImportBackupClicked = onImportBackupClicked)
         }
 
         PlacesUiState.Loading -> {
@@ -118,7 +125,9 @@ private fun EmptyFavoritePlacesContent() {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
-        modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
     ) {
         Text(
             stringResource(R.string.no_favorite_places_title),
