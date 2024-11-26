@@ -2,16 +2,14 @@ package ru.smalljinn.domain.usecase.place
 
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import kotlinx.datetime.Clock
 import org.junit.Before
 import ru.smalljinn.domain.repository.ImageRepository
 import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.domain.resource.ResourceManager
-import ru.smalljinn.model.data.Image
-import ru.smalljinn.model.data.Place
-import ru.smalljinn.model.data.Position
 import ru.smalljinn.repository.FakeImageRepository
 import ru.smalljinn.repository.FakePlaceRepository
+import ru.smalljinn.util.ImageUtils
+import ru.smalljinn.util.PlaceUtils
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -32,21 +30,8 @@ class SavePlaceUseCaseTest {
 
     @Test
     fun `Use case successfully saves place`() {
-        val firstPlaceImages = listOf(
-            Image(0, "dummyUri"),
-            Image(1, "dummyUri1"),
-            Image(2, "dummyUri2"),
-        )
-        val newPlace = Place(
-            id = 0,
-            title = "dummyTitle",
-            description = "dummyDescription",
-            position = Position(latitude = 2.55, longitude = 3.45),
-            creationDate = Clock.System.now(),
-            headerImageId = null,
-            favorite = false,
-            images = firstPlaceImages
-        )
+        val firstPlaceImages = ImageUtils.getTestImages(3)
+        val newPlace = PlaceUtils.getTestPlace(images = firstPlaceImages)
         runBlocking {
             savePlaceUseCase(
                 newPlace,
