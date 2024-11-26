@@ -1,12 +1,14 @@
 package ru.smalljinn.import_export
 
 import android.net.Uri
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.cbor.Cbor
 import kotlinx.serialization.decodeFromByteArray
 import kotlinx.serialization.encodeToByteArray
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.saving.FileController
 import ru.smalljinn.model.data.Image
 import ru.smalljinn.model.data.Place
@@ -15,7 +17,8 @@ import ru.smalljinn.model.data.response.Result
 import javax.inject.Inject
 
 class CborFileManager @Inject constructor(
-    private val fileController: FileController
+    private val fileController: FileController,
+    @Dispatcher(KolumbusDispatcher.IO) private val ioDispatcher: CoroutineDispatcher,
 ) {
     /**
      * Encodes places to [CborPlaceModel] and writes it to [outputFileUri] file.
@@ -23,7 +26,7 @@ class CborFileManager @Inject constructor(
      */
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun createBackupFile(places: Set<Place>, outputFileUri: Uri): Boolean =
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             runCatching {
                 val placesCbor = places.map { place ->
                     val imagesBytes: List<ByteArray> = readImages(place.images)
@@ -46,7 +49,7 @@ class CborFileManager @Inject constructor(
      */
     @OptIn(ExperimentalSerializationApi::class)
     suspend fun importBackupFile(uri: Uri): Result<List<CborPlaceModel>, ImportError> =
-         withContext(Dispatchers.IO) {
+         withContext(ioDispatcher) {
             runCatching {
                 when (val readResult = fileController.readBytes(uri.toString())) {
                     is Result.Error -> return@withContext Result.Error(ImportError.UNKNOWN)

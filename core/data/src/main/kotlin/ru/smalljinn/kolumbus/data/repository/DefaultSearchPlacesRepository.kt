@@ -1,6 +1,6 @@
 package ru.smalljinn.kolumbus.data.repository
 
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
@@ -12,17 +12,20 @@ import ru.smalljinn.database.dao.PlaceDao
 import ru.smalljinn.database.dao.SearchPlaceDao
 import ru.smalljinn.database.model.asModels
 import ru.smalljinn.database.model.toPlaceFts
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.repository.SearchPlacesRepository
 import ru.smalljinn.model.data.Place
 import javax.inject.Inject
 
 class DefaultSearchPlacesRepository @Inject constructor(
     private val searchPlaceDao: SearchPlaceDao,
-    private val placeDao: PlaceDao
+    private val placeDao: PlaceDao,
+    @Dispatcher(KolumbusDispatcher.IO) private val ioDispatcher: CoroutineDispatcher
 ) : SearchPlacesRepository {
 
     override suspend fun populateFtsData() {
-        withContext(Dispatchers.IO) {
+        withContext(ioDispatcher) {
             searchPlaceDao.insertAll(
                 placeDao.getPlacesStream().first().map { it.toPlaceFts() }
             )

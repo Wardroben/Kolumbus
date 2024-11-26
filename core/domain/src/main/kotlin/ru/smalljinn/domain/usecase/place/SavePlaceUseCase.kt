@@ -1,8 +1,10 @@
 package ru.smalljinn.domain.usecase.place
 
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.R
 import ru.smalljinn.domain.repository.ImageRepository
 import ru.smalljinn.domain.repository.PlacesRepository
@@ -17,7 +19,8 @@ private const val TAG = "SavePlaceUC"
 class SavePlaceUseCase @Inject constructor(
     private val placesRepository: PlacesRepository,
     private val imagesRepository: ImageRepository,
-    private val resourceManager: ResourceManager
+    private val resourceManager: ResourceManager,
+    @Dispatcher(KolumbusDispatcher.IO) private val ioDispatcher: CoroutineDispatcher
 ) {
     @Throws(InvalidPlaceException::class)
     suspend operator fun invoke(
@@ -34,7 +37,7 @@ class SavePlaceUseCase @Inject constructor(
         )
         //if (place.isPlaceInvalid) throw InvalidPlaceException(R.string.invalid_position_exception)
 
-        return withContext(Dispatchers.IO) {
+        return withContext(ioDispatcher) {
             val placeId = if (place.id == Place.CREATION_ID) 0L else place.id
             val imagesToInsert = place.images.filter { it.id == 0L }
             val placeToInsert = place.copy(id = placeId)

@@ -11,6 +11,7 @@ android {
 dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:domain"))
+    implementation(project(":core:di"))
     implementation(libs.kotlinx.serialization.cbor)
 
     androidTestImplementation(libs.androidx.test.core)

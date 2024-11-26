@@ -8,17 +8,20 @@ import coil.ImageLoader
 import coil.request.ImageRequest
 import coil.size.Size
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.image.ImageFormat
 import ru.smalljinn.domain.image.ImageGetter
 import javax.inject.Inject
 
 class AndroidImageGetter @Inject constructor(
     @ApplicationContext private val context: Context,
+    @Dispatcher(KolumbusDispatcher.Default) private val defaultDispatcher: CoroutineDispatcher,
     private val imageLoader: ImageLoader
 ): ImageGetter<Bitmap> {
-    override suspend fun getImage(uri: String): Bitmap? = withContext(Dispatchers.Default) {
+    override suspend fun getImage(uri: String): Bitmap? = withContext(defaultDispatcher) {
         runCatching {
             imageLoader.execute(
                 ImageRequest.Builder(context)

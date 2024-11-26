@@ -2,14 +2,18 @@ package ru.smalljinn.kolumbus.data.image
 
 import android.graphics.Bitmap
 import androidx.core.graphics.scale
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.image.ImageScaler
 import javax.inject.Inject
 
-class AndroidImageScaler @Inject constructor(): ImageScaler<Bitmap> {
+class AndroidImageScaler @Inject constructor(
+    @Dispatcher(KolumbusDispatcher.Default) private val defaultDispatcher: CoroutineDispatcher
+): ImageScaler<Bitmap> {
     override suspend fun scaleImage(image: Bitmap, imageSize: Int): Bitmap {
-        return withContext(Dispatchers.Default) {
+        return withContext(defaultDispatcher) {
             with(image) {
                 /*val ratio: Float =
                     if (width >= height) imageSize.toFloat() / width else imageSize.toFloat() / height

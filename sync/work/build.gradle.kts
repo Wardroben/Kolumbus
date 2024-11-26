@@ -9,6 +9,7 @@ android {
 
 dependencies {
     implementation(project(":core:domain"))
+    implementation(project(":core:di"))
     ksp(libs.hilt.ext.compiler)
 
     implementation(project(":core:data"))

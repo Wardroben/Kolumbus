@@ -2,8 +2,10 @@ package ru.smalljinn.kolumbus.data.image
 
 import android.graphics.Bitmap
 import android.os.Build
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.image.ImageCompressor
 import ru.smalljinn.domain.image.ImageFormat
 import ru.smalljinn.domain.image.ImageScaler
@@ -13,10 +15,11 @@ import javax.inject.Inject
 private const val TARGET_IMAGE_DENSITY = 256
 
 class AndroidImageCompressor @Inject constructor(
-    private val imageScaler: ImageScaler<Bitmap>
+    private val imageScaler: ImageScaler<Bitmap>,
+    @Dispatcher(KolumbusDispatcher.Default) private val defaultDispatcher: CoroutineDispatcher
 ): ImageCompressor<Bitmap> {
     override suspend fun compressImage(image: Bitmap, imageFormat: ImageFormat): ByteArray {
-        return withContext(Dispatchers.Default) {
+        return withContext(defaultDispatcher) {
             val scaledBitmap = imageScaler.scaleImage(image, TARGET_IMAGE_DENSITY) //scaleImage(image, TARGET_IMAGE_SIZE)
             val compressFormat = determineCompressFormat(imageFormat)
 

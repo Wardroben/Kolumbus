@@ -3,7 +3,9 @@ package ru.smalljinn.kolumbus.data.saving
 import android.content.Context
 import androidx.core.net.toUri
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineDispatcher
+import ru.smalljinn.di.Dispatcher
+import ru.smalljinn.di.KolumbusDispatcher
 import ru.smalljinn.domain.saving.FileController
 import ru.smalljinn.kolumbus.data.image.ImageFileProvider
 import ru.smalljinn.kolumbus.data.util.clearCache
@@ -13,6 +15,7 @@ import javax.inject.Inject
 
 class AndroidFileController @Inject constructor(
     @ApplicationContext private val context: Context,
+    @Dispatcher(KolumbusDispatcher.IO) private val ioDispatcher: CoroutineDispatcher
 ) : FileController {
     override suspend fun writeBytes(uri: String, data: ByteArray): Result<Unit, FileError> {
         runCatching {
@@ -55,6 +58,6 @@ class AndroidFileController @Inject constructor(
     }
 
     override fun clearCache() {
-        context.clearCache(Dispatchers.IO)
+        context.clearCache(ioDispatcher)
     }
 }
