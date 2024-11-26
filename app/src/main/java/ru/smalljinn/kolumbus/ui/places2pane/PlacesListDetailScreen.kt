@@ -120,6 +120,7 @@ fun PlacesListDetailScreen(
         )
     )
 
+    //TODO if it screen opened after search in compact mode navigate back by system
     BackHandler(listDetailNavigator.canNavigateBack()) {
         listDetailNavigator.navigateBack()
     }

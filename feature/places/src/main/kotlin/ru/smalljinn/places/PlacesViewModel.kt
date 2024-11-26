@@ -1,5 +1,6 @@
 package ru.smalljinn.places
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ru.smalljinn.domain.repository.ImportExportRepository
 import ru.smalljinn.domain.repository.PlacesRepository
 import ru.smalljinn.kolumbus.data.repository.UserSettingsRepository
 import ru.smalljinn.kolumbus.data.util.SyncManager
@@ -23,6 +25,7 @@ const val PLACE_ID_KEY = "selectedPlaceId"
 class PlacesViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val placesRepository: PlacesRepository,
+    private val importExportRepository: ImportExportRepository,
     syncManager: SyncManager,
     private val userSettingsRepository: UserSettingsRepository,
 ) : ViewModel() {
@@ -83,6 +86,10 @@ class PlacesViewModel @Inject constructor(
             is PlaceEvent.DisplayFavorite -> viewModelScope.launch {
                 userSettingsRepository.setPlaceFavoriteDisplay(event.onlyFavorite)
             }
+
+            is PlaceEvent.ImportBackup -> viewModelScope.launch {
+                importExportRepository.importPlaces(event.uri)
+            }
         }
     }
 }
@@ -92,4 +99,5 @@ sealed interface PlaceEvent {
     data class DeletePlace(val place: Place) : PlaceEvent
     data class SelectPlace(val placeId: Long) : PlaceEvent
     data class DisplayFavorite(val onlyFavorite: Boolean) : PlaceEvent
+    data class ImportBackup(val uri: Uri) : PlaceEvent
 }

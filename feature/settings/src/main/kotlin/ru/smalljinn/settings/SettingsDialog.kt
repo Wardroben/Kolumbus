@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import ru.smalljinn.ui.utils.pickers.rememberFilePicker
 
 private const val BACKUP_FILE_NAME = "kolumbus_backup.dat"
 private const val BACKUP_MIMETYPE = "application/octet-stream"
@@ -51,15 +52,15 @@ fun SettingsDialog(onDismiss: () -> Unit, viewModel: SettingsViewModel = hiltVie
         ActivityResultContracts.CreateDocument(mimeType = BACKUP_MIMETYPE)
     ) { uri: Uri? -> uri?.let { viewModel.createBackup(it) } }
 
-    val openFileLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri: Uri? -> uri?.let { viewModel.importBackup(it) } }
+    val openFileLauncher = rememberFilePicker { uri ->
+        viewModel.importBackup(uri)
+    }
 
     SettingsDialog(
         onDismiss = onDismiss,
         settingsUiState = settings,
         onChangeCardStyle = viewModel::updateCardStyle,
-        onImportBackupClicked = { openFileLauncher.launch(arrayOf(BACKUP_MIMETYPE)) },
+        onImportBackupClicked = { openFileLauncher.pickFile() },
         onCreateBackupClicked = { createFileLauncher.launch(BACKUP_FILE_NAME) }
     )
 }

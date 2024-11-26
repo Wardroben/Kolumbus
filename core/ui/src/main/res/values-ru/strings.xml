@@ -14,4 +14,5 @@
     <string name="cancel_editing_text">Все несохранённые данные будут утеряны. Отменить изменения?</string>
     <string name="delete_action">Удалить</string>
     <string name="change_map_layer_cd">Изменить слой карты</string>
+    <string name="import_backup_from_file">Восстановить из файла резервоного копирования</string>
 </resources>

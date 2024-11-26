@@ -11,5 +11,5 @@ fun NavController.navigateToPlaces(
     initialPlaceId: Long? = null,
     navOptions: NavOptions? = null
 ) {
-    navigate(route = PlacesRoute(initialPlaceId), navOptions)
+    navigate(route = PlacesRoute(initialPlaceId), navOptions = navOptions)
 }

@@ -415,14 +415,14 @@ private fun TakeCameraPhotoButton(
     getUriForPhoto: () -> Uri
 ) {
     val context = LocalContext.current
-    var photoUri by remember { mutableStateOf<Uri?>(null) }
+    var photoUri by remember { mutableStateOf<Uri>(Uri.EMPTY) }
     var showExplanationDialogForCameraPermission by remember { mutableStateOf(false) }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.TakePicture()
     ) { photoTaken ->
         if (photoTaken) {
-            photoUri?.let(onPhotoTaken)
+            photoUri.takeIf { it != Uri.EMPTY }?.let(onPhotoTaken)
         }
     }
 

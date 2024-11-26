@@ -24,7 +24,7 @@ fun KolumbusNavHost(
         )
         searchScreen(
             onBackClick = navController::popBackStack,
-            onPlaceClicked = navController::navigateToPlaces
+            onPlaceClicked = { placeId -> navController.navigateToPlaces(initialPlaceId = placeId) }
         )
     }
 }
