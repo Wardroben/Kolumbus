@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -19,10 +20,11 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun PlaceDetailPlaceholder(modifier: Modifier = Modifier) {
     val roundSize = remember { 24.dp }
-    val noRoundSize = remember { 24.dp }
+    val noRoundSize = remember { 0.dp }
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(roundSize, roundSize, noRoundSize, noRoundSize)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        shape = RoundedCornerShape(roundSize, noRoundSize, noRoundSize, noRoundSize)
     ) {
         Column(
             modifier = Modifier.fillMaxSize(),
