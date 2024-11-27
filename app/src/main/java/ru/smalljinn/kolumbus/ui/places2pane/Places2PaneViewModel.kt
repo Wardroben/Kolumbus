@@ -61,6 +61,10 @@ class Places2PaneViewModel @Inject constructor(
             clearPlaceToDelete()
         }
     }
+
+    fun unselectPlace() {
+        savedStateHandle[PLACE_ID_KEY] = null
+    }
 }
 
 data class Place2PaneState(

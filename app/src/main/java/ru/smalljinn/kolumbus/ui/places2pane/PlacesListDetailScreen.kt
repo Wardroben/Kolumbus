@@ -86,12 +86,13 @@ internal fun PlacesListDetailScreen(
         windowAdaptiveInfo = windowAdaptiveInfo,
         selectedPlaceId = selectedPlaceId,
         placesState = state,
-        onPlaceClick = { viewModel.selectPlace(it) },
+        onPlaceClick = viewModel::selectPlace,
         setPlaceToDelete = { id, title -> viewModel.setToDeletePlace(id, title) },
         onDeleteDismiss = viewModel::clearPlaceToDelete,
         onPlaceDeletionConfirmed = viewModel::deletePlace,
         onSearchClicked = onSearchClicked,
         onSettingsClicked = { showSettingsDialog = true },
+        unselectPlace = viewModel::unselectPlace,
         onShowMessage = onShowMessage
     )
 }
@@ -108,6 +109,7 @@ fun PlacesListDetailScreen(
     onShowMessage: (String) -> Unit,
     onSearchClicked: () -> Unit,
     onSettingsClicked: () -> Unit,
+    unselectPlace: () -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo
 ) {
     val listDetailNavigator = rememberListDetailPaneScaffoldNavigator(
@@ -120,9 +122,14 @@ fun PlacesListDetailScreen(
         )
     )
 
+    fun navigateListDetailBack() {
+        listDetailNavigator.navigateBack()
+        unselectPlace()
+    }
+
     //TODO if it screen opened after search in compact mode navigate back by system
     BackHandler(listDetailNavigator.canNavigateBack()) {
-        listDetailNavigator.navigateBack()
+        navigateListDetailBack()
     }
 
     var nestedNavHostStartRoute by remember {
@@ -197,7 +204,7 @@ fun PlacesListDetailScreen(
                     ) {
                         placeScreen(
                             showBackButton = !listDetailNavigator.isListPaneVisible(),
-                            onBackClick = listDetailNavigator::navigateBack,
+                            onBackClick = { navigateListDetailBack() },
                             onPlaceDelete = { id, title -> setPlaceToDelete(id, title) },
                             onShowMessage = onShowMessage
                         )
